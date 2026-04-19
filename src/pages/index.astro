@@ -2,21 +2,186 @@
 import BaseHead from '../components/BaseHead.astro';
 import Footer from '../components/Footer.astro';
 import Header from '../components/Header.astro';
-import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
+import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
 ---
 
 <!doctype html>
 <html lang="en">
 	<head>
 		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
+		<style>
+			main {
+				width: 720px;
+				max-width: calc(100% - 2em);
+				margin: auto;
+				padding: 3em 1em;
+			}
+			.disclaimer {
+				background: #fff8e1;
+				border-left: 4px solid #f59e0b;
+				padding: 0.75em 1em;
+				border-radius: 4px;
+				font-size: 0.9em;
+				color: #7c6400;
+				margin-bottom: 2em;
+			}
+			h1 {
+				font-size: 1.6em;
+				margin-bottom: 0.3em;
+			}
+			h2 {
+				font-size: 1.15em;
+				margin-top: 2em;
+				margin-bottom: 0.5em;
+			}
+			h3 {
+				font-size: 1em;
+				margin-top: 1.5em;
+				margin-bottom: 0.3em;
+			}
+			.subtitle {
+				color: rgb(var(--gray));
+				margin-bottom: 2em;
+				font-size: 1em;
+			}
+			table {
+				width: 100%;
+				border-collapse: collapse;
+				margin: 1em 0;
+			}
+			th, td {
+				text-align: left;
+				padding: 0.6em 0.8em;
+				border: 1px solid rgb(var(--gray-light));
+			}
+			th {
+				background: rgb(var(--gray-light));
+			}
+			.callout {
+				background: #f0f4ff;
+				border-left: 4px solid #2337ff;
+				padding: 0.75em 1em;
+				border-radius: 4px;
+				margin: 1.5em 0;
+			}
+			.callout.warning {
+				background: #fff0f0;
+				border-left-color: #dc2626;
+			}
+			.callout.green {
+				background: #f0fdf4;
+				border-left-color: #16a34a;
+			}
+			ol li, ul li {
+				margin-bottom: 0.4em;
+			}
+		</style>
 	</head>
 	<body>
 		<Header />
 		<main>
-			<h1>California DUI Help</h1>
-			<p>Clear, plain-English information about what happens after a DUI arrest in California.</p>
+			<div class="disclaimer">
+				<strong>Not legal advice.</strong> This site provides general information only. If you've been arrested for DUI, consult a licensed California attorney.
+			</div>
+
+			<h1>What Actually Happens After a Misdemeanor DUI Arrest</h1>
+			<p class="subtitle">Last updated: April 2026</p>
+
+			<p>When someone gets pulled over and arrested for DUI, two separate things start at the same time: a criminal case in court, and a DMV case about your license. These are completely independent — you can actually win one and lose the other.</p>
+
+			<hr />
+
+			<h2>The Court Process (Step by Step)</h2>
+			<ol>
+				<li><strong>Arrest &amp; booking</strong> — You might get held for a few hours or overnight.</li>
+				<li><strong>Arraignment</strong> — Your first court appearance. You enter a plea: guilty, not guilty, or no contest.</li>
+				<li><strong>Pre-trial / negotiation</strong> — This is where a lawyer might try to reduce the charge (like to a "wet reckless").</li>
+				<li><strong>Trial</strong> — Most cases don't make it here. They usually get resolved before this.</li>
+			</ol>
+
+			<hr />
+
+			<h2>The DMV Side (This Catches People Off Guard)</h2>
+			<p>After a DUI arrest, you typically have <strong>10 days to request a DMV hearing</strong>. If you don't:</p>
+			<div class="callout warning">
+				Your license automatically gets suspended — even if you haven't gone to court yet.
+			</div>
+			<p>The DMV case moves completely independently from your criminal case. Don't ignore it.</p>
+
+			<hr />
+
+			<h2>What the Penalties Actually Feel Like</h2>
+
+			<h3>Jail Time</h3>
 			<ul>
-				<li><a href="/blog/california-dui-what-happens">What Happens After a California DUI Arrest</a></li>
+				<li><strong>First offense:</strong> usually little to none — often probation instead</li>
+				<li><strong>Second/third offense:</strong> way more likely to serve actual time</li>
+			</ul>
+
+			<h3>Fines</h3>
+			<ul>
+				<li>Base fine might be ~$390, but after court fees and assessments it's easily <strong>$2,000–$10,000 total</strong></li>
+			</ul>
+
+			<h3>License Suspension</h3>
+			<ul>
+				<li>First offense: ~4–6 months (sometimes you can drive with restrictions)</li>
+			</ul>
+
+			<h3>DUI School</h3>
+			<ul>
+				<li>First offense: 3–9 months</li>
+				<li>Repeat offenders: up to 18–30 months</li>
+
+			</ul>
+
+			<h3>Ignition Interlock Device (IID)</h3>
+			<ul>
+				<li>You blow into it before your car will start</li>
+				<li>Becoming more common even for first offenses</li>
+			</ul>
+
+			<h3>Probation</h3>
+			<p>Usually 3–5 years, with conditions like:</p>
+			<ul>
+				<li>No driving with any alcohol in your system</li>
+				<li>Don't refuse chemical tests again</li>
+				<li>No new offenses</li>
+			</ul>
+
+			<hr />
+
+			<h2>"Wet Reckless" — This Can Make a Big Difference</h2>
+			<p>A <strong>wet reckless</strong> (California Vehicle Code 23103.5) is a reduced charge that a lawyer might be able to negotiate for a first-time case. Compared to a DUI conviction:</p>
+			<div class="callout green">
+				<ul style="margin:0; padding-left:1.2em;">
+					<li>Lesser charge on your record</li>
+					<li>Lower fines</li>
+					<li>Shorter DUI school program</li>
+					<li>Less overall impact</li>
+				</ul>
+			</div>
+			<p>The catch: it still counts as a prior DUI if you get another one later.</p>
+
+			<hr />
+
+			<h2>Things That Make It Worse (Even if Still a Misdemeanor)</h2>
+			<p>Penalties can increase even without an injury if:</p>
+			<ul>
+				<li>Your BAC was <strong>0.15% or higher</strong></li>
+				<li>You were speeding or driving recklessly</li>
+				<li>You <strong>refused a breath/blood test</strong></li>
+				<li>There was a child in the car</li>
+			</ul>
+
+			<hr />
+
+			<h2>Long-Term Consequences People Underestimate</h2>
+			<ul>
+				<li>Car insurance can skyrocket</li>
+				<li>Shows up on background checks</li>
+				<li>Can affect jobs — especially driving jobs</li>
+				<li>Stays on your driving record for <strong>10 years</strong></li>
 			</ul>
 		</main>
 		<Footer />
