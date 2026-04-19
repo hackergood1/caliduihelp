@@ -1,0 +1,61 @@
+---
+import BaseHead from '../components/BaseHead.astro';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<BaseHead title="Privacy Policy — CaliDUIHelp" description="Privacy policy for CaliDUIHelp.com, including information about cookies, advertising, and your rights under CCPA and GDPR." />
+		<style>
+			main {
+				width: 720px;
+				max-width: calc(100% - 2em);
+				margin: auto;
+				padding: 3em 1em;
+			}
+			h1 { font-size: 1.6em; margin-bottom: 0.3em; }
+			h2 { font-size: 1.15em; margin-top: 2em; margin-bottom: 0.5em; }
+			.updated { color: rgb(var(--gray)); font-size: 0.9em; margin-bottom: 2em; }
+		</style>
+	</head>
+	<body>
+		<Header />
+		<main>
+			<h1>Privacy Policy</h1>
+			<p class="updated">Last updated: April 19, 2026</p>
+
+			<p>This privacy policy explains how CaliDUIHelp.com ("we", "us", "our") collects and uses information when you visit this website.</p>
+
+			<h2>Information We Collect</h2>
+			<p>We do not directly collect personal information. However, third-party services used on this site may collect data automatically, including your IP address, browser type, and browsing behavior via cookies.</p>
+
+			<h2>Google AdSense & Cookies</h2>
+			<p>This site uses Google AdSense to display advertisements. Google uses cookies to serve ads based on your prior visits to this and other websites. You can opt out of personalized advertising by visiting <a href="https://www.google.com/settings/ads" target="_blank" rel="noopener">Google's Ads Settings</a>.</p>
+			<p>Google's use of advertising cookies is governed by <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google's Privacy Policy</a>.</p>
+
+			<h2>California Privacy Rights (CCPA / CPRA)</h2>
+			<p>If you are a California resident, you have the right to:</p>
+			<ul>
+				<li>Know what personal data is collected about you</li>
+				<li>Request deletion of your personal data</li>
+				<li>Opt out of the sale of your personal data</li>
+			</ul>
+			<p>We do not sell personal data. To exercise your rights, contact us at the email below.</p>
+
+			<h2>GDPR (European Users)</h2>
+			<p>If you are visiting from the European Union, you have rights under the General Data Protection Regulation (GDPR), including the right to access, correct, or delete your data. By using this site you consent to cookies as described in this policy. You may withdraw consent at any time by clearing your browser cookies.</p>
+
+			<h2>Third-Party Links</h2>
+			<p>This site may contain links to external websites. We are not responsible for the privacy practices of those sites.</p>
+
+			<h2>Changes to This Policy</h2>
+			<p>We may update this policy from time to time. Changes will be posted on this page with an updated date.</p>
+
+			<h2>Contact</h2>
+			<p>For any privacy-related questions, email us at: <a href="mailto:lysajop@gmail.com">lysajop@gmail.com</a></p>
+		</main>
+		<Footer />
+	</body>
+</html>

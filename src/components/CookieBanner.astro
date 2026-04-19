@@ -1,0 +1,61 @@
+---
+---
+
+<div id="cookie-banner">
+	<p>
+		This site uses cookies to serve ads via Google AdSense. By continuing to use this site you accept our
+		<a href="/privacy">Privacy Policy</a>.
+	</p>
+	<button id="cookie-accept">Got it</button>
+</div>
+
+<style>
+	#cookie-banner {
+		display: none;
+		position: fixed;
+		bottom: 0;
+		left: 0;
+		right: 0;
+		background: #1e293b;
+		color: #f1f5f9;
+		padding: 1em 1.5em;
+		font-size: 0.85em;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 1em;
+		z-index: 1000;
+		flex-wrap: wrap;
+	}
+	#cookie-banner p {
+		margin: 0;
+	}
+	#cookie-banner a {
+		color: #93c5fd;
+	}
+	#cookie-accept {
+		background: #2337ff;
+		color: white;
+		border: none;
+		padding: 0.5em 1.2em;
+		border-radius: 4px;
+		cursor: pointer;
+		font-size: 0.9em;
+		white-space: nowrap;
+	}
+	#cookie-accept:hover {
+		background: #1a2bcc;
+	}
+</style>
+
+<script>
+	const banner = document.getElementById('cookie-banner');
+	const btn = document.getElementById('cookie-accept');
+	if (!localStorage.getItem('cookie-consent')) {
+		banner!.style.display = 'flex';
+	}
+	btn!.addEventListener('click', () => {
+		localStorage.setItem('cookie-consent', 'true');
+		banner!.style.display = 'none';
+	});
+</script>
