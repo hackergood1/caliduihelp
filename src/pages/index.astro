@@ -9,6 +9,20 @@ import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
 <html lang="en">
 	<head>
 		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
+		<script type="application/ld+json" set:html={JSON.stringify({
+			"@context": "https://schema.org",
+			"@type": "Article",
+			"headline": "What Actually Happens After a Misdemeanor DUI Arrest in California",
+			"description": "A plain-English breakdown of the court process, DMV deadlines, penalties, and long-term consequences of a California DUI arrest.",
+			"url": "https://caliduihelp.com/",
+			"publisher": {
+				"@type": "Organization",
+				"name": "CaliDUIHelp",
+				"url": "https://caliduihelp.com"
+			},
+			"datePublished": "2026-04-19",
+			"dateModified": "2026-04-19"
+		})} />
 		<style>
 			main {
 				width: 720px;
