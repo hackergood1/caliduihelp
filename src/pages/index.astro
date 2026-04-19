@@ -90,6 +90,21 @@ import CookieBanner from '../components/CookieBanner.astro';
 			ol li, ul li {
 				margin-bottom: 0.4em;
 			}
+			.promo-banner {
+				display: block;
+				background: #f0f4ff;
+				border: 1px solid #c7d2fe;
+				border-left: 4px solid #2337ff;
+				padding: 0.9em 1.2em;
+				border-radius: 6px;
+				text-decoration: none;
+				color: rgb(var(--gray-dark));
+				margin: 2em 0;
+				font-size: 0.95em;
+			}
+			.promo-banner:hover {
+				background: #e0e7ff;
+			}
 		</style>
 	</head>
 	<body>
@@ -190,6 +205,10 @@ import CookieBanner from '../components/CookieBanner.astro';
 			</ul>
 
 			<hr />
+
+			<a href="/dmv-hearing" class="promo-banner">
+				We can also help you understand the <strong>California DUI DMV Hearing</strong> process &rarr;
+			</a>
 
 			<h2>Long-Term Consequences People Underestimate</h2>
 			<ul>
