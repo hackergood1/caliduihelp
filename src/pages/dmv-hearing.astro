@@ -1,0 +1,136 @@
+---
+import BaseHead from '../components/BaseHead.astro';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import CookieBanner from '../components/CookieBanner.astro';
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<BaseHead
+			title="California DUI DMV Hearing — How to Request It, What Happens, How to Win"
+			description="Everything you need to know about the California DMV hearing after a DUI arrest — deadlines, what to expect, and how to fight your license suspension."
+		/>
+		<style>
+			main {
+				width: 720px;
+				max-width: calc(100% - 2em);
+				margin: auto;
+				padding: 3em 1em;
+			}
+			.disclaimer {
+				background: #fff8e1;
+				border-left: 4px solid #f59e0b;
+				padding: 0.75em 1em;
+				border-radius: 4px;
+				font-size: 0.9em;
+				color: #7c6400;
+				margin-bottom: 2em;
+			}
+			h1 {
+				font-size: 1.6em;
+				margin-bottom: 0.3em;
+			}
+			.subtitle {
+				color: rgb(var(--gray));
+				font-size: 0.95em;
+				margin-bottom: 2em;
+			}
+			.accordion {
+				border: 1px solid rgb(var(--gray-light));
+				border-radius: 8px;
+				overflow: hidden;
+				margin-bottom: 1em;
+			}
+			.accordion-header {
+				width: 100%;
+				background: #f8fafc;
+				border: none;
+				padding: 1em 1.2em;
+				text-align: left;
+				font-size: 1em;
+				font-weight: 700;
+				cursor: pointer;
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				color: rgb(var(--black));
+			}
+			.accordion-header:hover {
+				background: #f0f4ff;
+			}
+			.accordion-header .arrow {
+				transition: transform 0.2s ease;
+				font-size: 0.8em;
+				color: rgb(var(--gray));
+			}
+			.accordion-header.open .arrow {
+				transform: rotate(180deg);
+			}
+			.accordion-body {
+				display: none;
+				padding: 1em 1.2em 1.2em;
+				border-top: 1px solid rgb(var(--gray-light));
+				color: rgb(var(--gray-dark));
+				line-height: 1.7;
+			}
+			.accordion-body.open {
+				display: block;
+			}
+		</style>
+	</head>
+	<body>
+		<Header />
+		<main>
+			<div class="disclaimer">
+				<strong>Not legal advice.</strong> This site provides general information only. If you've been arrested for DUI, consult a licensed California attorney.
+			</div>
+
+			<h1>California DUI DMV Hearing</h1>
+			<p class="subtitle">How to request it, what happens, and how to win</p>
+
+			<div class="accordion">
+				<button class="accordion-header">
+					How to Request a DMV Hearing
+					<span class="arrow">&#9660;</span>
+				</button>
+				<div class="accordion-body">
+					<p>Content coming soon.</p>
+				</div>
+			</div>
+
+			<div class="accordion">
+				<button class="accordion-header">
+					What Happens at a DMV Hearing
+					<span class="arrow">&#9660;</span>
+				</button>
+				<div class="accordion-body">
+					<p>Content coming soon.</p>
+				</div>
+			</div>
+
+			<div class="accordion">
+				<button class="accordion-header">
+					How to Win a DMV Hearing
+					<span class="arrow">&#9660;</span>
+				</button>
+				<div class="accordion-body">
+					<p>Content coming soon.</p>
+				</div>
+			</div>
+		</main>
+		<CookieBanner />
+		<Footer />
+
+		<script>
+			document.querySelectorAll('.accordion-header').forEach(button => {
+				button.addEventListener('click', () => {
+					const body = button.nextElementSibling as HTMLElement;
+					button.classList.toggle('open');
+					body.classList.toggle('open');
+				});
+			});
+		</script>
+	</body>
+</html>
