@@ -1,0 +1,33 @@
+---
+import BaseHead from '../components/BaseHead.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import CookieBanner from '../components/CookieBanner.astro';
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<BaseHead
+			title="Check Your Options — California DUI Help"
+			description="Find out what options are still available after a California DUI. Fill out the form to get started."
+		/>
+		<style>
+			main {
+				width: 720px;
+				max-width: calc(100% - 2em);
+				margin: auto;
+				padding: 3em 1em;
+			}
+		</style>
+	</head>
+	<body>
+		<Header />
+		<main>
+			<h1>Check Your Options in Your Area</h1>
+			<p>Form coming soon.</p>
+		</main>
+		<CookieBanner />
+		<Footer />
+	</body>
+</html>
