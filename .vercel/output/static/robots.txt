@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-
-Sitemap: https://caliduihelp.com/sitemap-index.xml

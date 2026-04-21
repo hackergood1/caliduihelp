@@ -3,7 +3,7 @@ import { getPool } from '../../lib/db';
 
 export const POST: APIRoute = async ({ request, cookies }) => {
 	const auth = cookies.get('admin_auth');
-	if (auth?.value !== import.meta.env.ADMIN_PASSWORD) {
+	if (auth?.value !== process.env.ADMIN_PASSWORD) {
 		return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
 	}
 

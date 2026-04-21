@@ -2,7 +2,7 @@ import type { APIRoute } from 'astro';
 
 export const POST: APIRoute = async ({ request, cookies }) => {
 	const { password } = await request.json();
-	if (password === import.meta.env.ADMIN_PASSWORD) {
+	if (password === process.env.ADMIN_PASSWORD) {
 		cookies.set('admin_auth', password, {
 			path: '/',
 			httpOnly: true,

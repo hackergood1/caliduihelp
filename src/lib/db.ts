@@ -7,7 +7,7 @@ let pool: pg.Pool | null = null;
 export function getPool() {
 	if (!pool) {
 		pool = new Pool({
-			connectionString: import.meta.env.DATABASE_URL,
+			connectionString: process.env.DATABASE_URL,
 			ssl: { rejectUnauthorized: false },
 		});
 	}
