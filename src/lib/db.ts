@@ -1,40 +1,34 @@
-import pg from 'pg';
+import postgres from 'postgres';
 
-const { Pool } = pg;
+let sql: postgres.Sql | null = null;
 
-let pool: pg.Pool | null = null;
-
-export function getPool() {
-	if (!pool) {
-		pool = new Pool({
-			connectionString: process.env.DATABASE_URL,
-			ssl: { rejectUnauthorized: false },
+export function getSQL() {
+	if (!sql) {
+		sql = postgres(process.env.DATABASE_URL!, {
+			ssl: 'require',
+			max: 5,
 		});
 	}
-	return pool;
+	return sql;
 }
 
 export async function initDB() {
-	const client = await getPool().connect();
-	try {
-		await client.query(`
-			CREATE TABLE IF NOT EXISTS leads (
-				id SERIAL PRIMARY KEY,
-				full_name VARCHAR(255) NOT NULL,
-				email VARCHAR(255),
-				phone VARCHAR(50),
-				zip_code VARCHAR(10) NOT NULL,
-				incident_type VARCHAR(100) NOT NULL,
-				incident_date DATE,
-				description TEXT,
-				consent_checked BOOLEAN NOT NULL DEFAULT false,
-				created_at TIMESTAMPTZ DEFAULT NOW(),
-				status VARCHAR(50) DEFAULT 'new',
-				assigned_lawyer VARCHAR(255),
-				notes TEXT
-			)
-		`);
-	} finally {
-		client.release();
-	}
+	const sql = getSQL();
+	await sql`
+		CREATE TABLE IF NOT EXISTS leads (
+			id SERIAL PRIMARY KEY,
+			full_name VARCHAR(255) NOT NULL,
+			email VARCHAR(255),
+			phone VARCHAR(50),
+			zip_code VARCHAR(10) NOT NULL,
+			incident_type VARCHAR(100) NOT NULL,
+			incident_date DATE,
+			description TEXT,
+			consent_checked BOOLEAN NOT NULL DEFAULT false,
+			created_at TIMESTAMPTZ DEFAULT NOW(),
+			status VARCHAR(50) DEFAULT 'new',
+			assigned_lawyer VARCHAR(255),
+			notes TEXT
+		)
+	`;
 }

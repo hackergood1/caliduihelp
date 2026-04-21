@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { getPool } from '../../lib/db';
+import { getSQL } from '../../lib/db';
 
 export const POST: APIRoute = async ({ request, cookies }) => {
 	const auth = cookies.get('admin_auth');
@@ -13,11 +13,11 @@ export const POST: APIRoute = async ({ request, cookies }) => {
 			return new Response(JSON.stringify({ error: 'Missing lead_id or lawyer_email.' }), { status: 400 });
 		}
 
-		const pool = getPool();
-		await pool.query(
-			`UPDATE leads SET assigned_lawyer = $1, status = 'sent', notes = $2 WHERE id = $3`,
-			[lawyer_email, notes || null, lead_id]
-		);
+		const sql = getSQL();
+		await sql`
+			UPDATE leads SET assigned_lawyer = ${lawyer_email}, status = 'sent', notes = ${notes || null}
+			WHERE id = ${lead_id}
+		`;
 
 		return new Response(JSON.stringify({ success: true }), { status: 200 });
 	} catch (err) {

@@ -1,10 +1,9 @@
 import type { APIRoute } from 'astro';
-import { getPool, initDB } from '../../lib/db';
+import { getSQL, initDB } from '../../lib/db';
 
 export const POST: APIRoute = async ({ request }) => {
 	try {
 		const data = await request.json();
-
 		const { full_name, email, phone, zip_code, incident_type, incident_date, description, consent_checked } = data;
 
 		if (!full_name || !zip_code || !incident_type) {
@@ -15,13 +14,21 @@ export const POST: APIRoute = async ({ request }) => {
 		}
 
 		await initDB();
-		const pool = getPool();
+		const sql = getSQL();
 
-		await pool.query(
-			`INSERT INTO leads (full_name, email, phone, zip_code, incident_type, incident_date, description, consent_checked)
-			 VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-			[full_name, email || null, phone || null, zip_code, incident_type, incident_date || null, description || null, true]
-		);
+		await sql`
+			INSERT INTO leads (full_name, email, phone, zip_code, incident_type, incident_date, description, consent_checked)
+			VALUES (
+				${full_name},
+				${email || null},
+				${phone || null},
+				${zip_code},
+				${incident_type},
+				${incident_date || null},
+				${description || null},
+				${true}
+			)
+		`;
 
 		return new Response(JSON.stringify({ success: true }), { status: 200 });
 	} catch (err) {

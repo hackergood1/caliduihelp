@@ -1,6 +1,6 @@
 ---
 export const prerender = false;
-import { getPool, initDB } from '../../lib/db';
+import { getSQL, initDB } from '../../lib/db';
 
 const adminPassword = process.env.ADMIN_PASSWORD;
 const authCookie = Astro.cookies.get('admin_auth');
@@ -9,9 +9,8 @@ const isAuthed = authCookie?.value === adminPassword;
 let leads: any[] = [];
 if (isAuthed) {
 	await initDB();
-	const pool = getPool();
-	const result = await pool.query('SELECT * FROM leads ORDER BY created_at DESC');
-	leads = result.rows;
+	const sql = getSQL();
+	leads = await sql`SELECT * FROM leads ORDER BY created_at DESC`;
 }
 ---
 
