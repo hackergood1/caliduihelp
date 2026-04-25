@@ -1,9 +1,10 @@
 import type { APIRoute } from 'astro';
 import { getSQL } from '../../lib/db';
+import { verifyToken } from '../../lib/auth';
 
 export const POST: APIRoute = async ({ request, cookies }) => {
 	const auth = cookies.get('admin_auth');
-	if (auth?.value !== process.env.ADMIN_PASSWORD) {
+	if (!auth?.value || !verifyToken(auth.value, process.env.ADMIN_PASSWORD!)) {
 		return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
 	}
 

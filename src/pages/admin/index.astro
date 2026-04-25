@@ -1,172 +1,481 @@
 ---
 export const prerender = false;
-import { getSQL, initDB } from '../../lib/db';
 
-const adminPassword = process.env.ADMIN_PASSWORD;
-const authCookie = Astro.cookies.get('admin_auth');
-const isAuthed = authCookie?.value === adminPassword;
-
-let leads: any[] = [];
-if (isAuthed) {
-	await initDB();
-	const sql = getSQL();
-	leads = await sql`SELECT * FROM leads ORDER BY created_at DESC`;
-}
+let isAuthed = false;
+try {
+	const { verifyToken } = await import('../../lib/auth');
+	const authCookie = Astro.cookies.get('admin_auth');
+	isAuthed = !!authCookie?.value && verifyToken(authCookie.value, process.env.ADMIN_PASSWORD!);
+} catch {}
 ---
 
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<title>Admin — CaliDUIHelp Leads</title>
-		<style>
-			* { box-sizing: border-box; }
-			body { font-family: sans-serif; margin: 0; background: #f4f6f9; color: #1a1a1a; }
-			.login-wrap { max-width: 360px; margin: 8em auto; background: white; padding: 2em; border-radius: 8px; box-shadow: 0 2px 12px rgba(0,0,0,0.1); }
-			.login-wrap h1 { font-size: 1.3em; margin-bottom: 1em; }
-			.login-wrap input { width: 100%; padding: 0.6em 0.8em; margin-bottom: 1em; border: 1px solid #ddd; border-radius: 5px; font-size: 1em; }
-			.login-wrap button { width: 100%; background: #cc0000; color: white; border: none; padding: 0.7em; font-size: 1em; font-weight: 700; border-radius: 5px; cursor: pointer; }
-			.login-wrap button:hover { background: #a30000; }
-			#login-error { color: #cc0000; font-size: 0.9em; margin-top: 0.5em; display: none; }
-			header { background: #cc0000; color: white; padding: 1em 2em; display: flex; justify-content: space-between; align-items: center; }
-			header h1 { margin: 0; font-size: 1.2em; }
-			header span { font-size: 0.85em; opacity: 0.85; }
-			.container { max-width: 1100px; margin: 2em auto; padding: 0 1.5em; }
-			.stats { display: flex; gap: 1em; margin-bottom: 2em; flex-wrap: wrap; }
-			.stat-card { background: white; border-radius: 8px; padding: 1em 1.5em; flex: 1; min-width: 140px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
-			.stat-card .num { font-size: 2em; font-weight: 700; color: #cc0000; }
-			.stat-card .label { font-size: 0.85em; color: #666; }
-			table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
-			th { background: #1a1a1a; color: white; padding: 0.75em 1em; text-align: left; font-size: 0.85em; }
-			td { padding: 0.75em 1em; border-bottom: 1px solid #eee; font-size: 0.9em; vertical-align: top; }
-			tr:last-child td { border-bottom: none; }
-			tr:hover td { background: #fafafa; }
-			.badge { display: inline-block; padding: 0.2em 0.6em; border-radius: 20px; font-size: 0.78em; font-weight: 700; }
-			.badge-new { background: #fef3c7; color: #92400e; }
-			.badge-sent { background: #d1fae5; color: #065f46; }
-			.send-form input { padding: 0.35em 0.5em; border: 1px solid #ddd; border-radius: 4px; font-size: 0.85em; width: 180px; }
-			.send-form button { background: #2337ff; color: white; border: none; padding: 0.35em 0.8em; border-radius: 4px; font-size: 0.85em; cursor: pointer; margin-left: 0.3em; }
-			.send-form button:hover { background: #000d8a; }
-			.sent-label { color: #065f46; font-size: 0.85em; font-weight: 600; }
-		</style>
-	</head>
-	<body>
-		{!isAuthed ? (
-			<div class="login-wrap">
-				<h1>Admin Login</h1>
-				<input type="password" id="pw-input" placeholder="Enter admin password" />
-				<button id="login-btn">Log In</button>
-				<p id="login-error">Wrong password. Try again.</p>
-			</div>
-		) : (
-			<>
-				<header>
-					<h1>CaliDUIHelp — Leads Dashboard</h1>
-					<span>{leads.length} total submissions</span>
-				</header>
-				<div class="container">
-					<div class="stats">
-						<div class="stat-card">
-							<div class="num">{leads.length}</div>
-							<div class="label">Total Leads</div>
-						</div>
-						<div class="stat-card">
-							<div class="num">{leads.filter((l: any) => l.status === 'new').length}</div>
-							<div class="label">New</div>
-						</div>
-						<div class="stat-card">
-							<div class="num">{leads.filter((l: any) => l.status === 'sent').length}</div>
-							<div class="label">Sent to Lawyer</div>
-						</div>
-					</div>
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Calidu Legal Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg:#0d0f14;--bg2:#13161e;--bg3:#1a1e28;--bg4:#222736;
+    --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);
+    --text:#e8eaf0;--text2:#8b90a0;--text3:#555c70;
+    --accent:#4f8ef7;--accent-bg:rgba(79,142,247,0.1);--accent-border:rgba(79,142,247,0.3);
+    --green:#3ecf8e;--green-bg:rgba(62,207,142,0.1);
+    --amber:#f5a623;--amber-bg:rgba(245,166,35,0.1);
+    --red:#f56565;--red-bg:rgba(245,101,101,0.1);
+    --radius:10px;--radius-sm:6px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{height:100%;}
+  body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.6;}
 
-					<table>
-						<thead>
-							<tr>
-								<th>#</th>
-								<th>Name</th>
-								<th>Contact</th>
-								<th>ZIP</th>
-								<th>Situation</th>
-								<th>Date</th>
-								<th>Status</th>
-								<th>Send to Lawyer</th>
-							</tr>
-						</thead>
-						<tbody>
-							{leads.map((lead: any) => (
-								<tr>
-									<td>{lead.id}</td>
-									<td><strong>{lead.full_name}</strong>{lead.description ? <><br /><small style="color:#888">{lead.description.slice(0, 60)}{lead.description.length > 60 ? '…' : ''}</small></> : null}</td>
-									<td>{lead.email && <div>{lead.email}</div>}{lead.phone && <div>{lead.phone}</div>}</td>
-									<td>{lead.zip_code}</td>
-									<td>{lead.incident_type}</td>
-									<td style="white-space:nowrap">{lead.incident_date ? new Date(lead.incident_date).toLocaleDateString() : '—'}<br /><small style="color:#aaa">{new Date(lead.created_at).toLocaleDateString()}</small></td>
-									<td><span class={`badge ${lead.status === 'sent' ? 'badge-sent' : 'badge-new'}`}>{lead.status}</span>{lead.assigned_lawyer && <div style="font-size:0.78em;color:#666;margin-top:0.3em">{lead.assigned_lawyer}</div>}</td>
-									<td>
-										{lead.status === 'sent' ? (
-											<span class="sent-label">✓ Sent</span>
-										) : (
-											<div class="send-form" data-id={lead.id}>
-												<input type="email" placeholder="Lawyer email" />
-												<button>Send</button>
-											</div>
-										)}
-									</td>
-								</tr>
-							))}
-						</tbody>
-					</table>
-				</div>
-			</>
-		)}
+  /* Login */
+  .login-screen{display:flex;align-items:center;justify-content:center;height:100vh;}
+  .login-box{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius);padding:2em;width:320px;}
+  .login-box h2{color:var(--text);margin:0 0 1.2em;font-size:1.2em;}
+  .login-box input{width:100%;padding:0.6em 0.8em;margin-bottom:1em;border:1px solid var(--border2);border-radius:6px;font-size:1em;background:var(--bg3);color:var(--text);outline:none;}
+  .login-box button{width:100%;background:var(--accent-bg);color:var(--accent);border:1px solid var(--accent-border);padding:0.7em;font-size:1em;font-weight:600;border-radius:6px;cursor:pointer;}
+  .login-box button:hover{background:rgba(79,142,247,0.18);}
+  #login-err{color:var(--red);font-size:0.85em;margin-top:0.5em;display:none;}
 
-		<script>
-			// Login
-			const loginBtn = document.getElementById('login-btn');
-			if (loginBtn) {
-				loginBtn.addEventListener('click', async () => {
-					const pw = (document.getElementById('pw-input') as HTMLInputElement).value;
-					const res = await fetch('/api/admin-login', {
-						method: 'POST',
-						headers: { 'Content-Type': 'application/json' },
-						body: JSON.stringify({ password: pw }),
-					});
-					if (res.ok) {
-						window.location.reload();
-					} else {
-						const err = document.getElementById('login-error') as HTMLElement;
-						err.style.display = 'block';
-					}
-				});
-				const input = document.getElementById('pw-input') as HTMLInputElement;
-				input?.addEventListener('keydown', (e) => { if (e.key === 'Enter') loginBtn.click(); });
-			}
+  /* Shell */
+  .shell{display:flex;height:100vh;overflow:hidden;}
+  .sidebar{width:220px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;}
+  .main-area{flex:1;overflow:hidden;display:flex;flex-direction:column;}
+  .logo{padding:20px 18px 16px;border-bottom:1px solid var(--border);}
+  .logo-title{font-size:15px;font-weight:600;letter-spacing:0.01em;}
+  .logo-sub{font-size:11px;color:var(--text3);margin-top:2px;font-family:'DM Mono',monospace;}
+  .nav{padding:12px 10px;flex:1;}
+  .nav-item{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:var(--radius-sm);font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;transition:all 0.15s;margin-bottom:2px;user-select:none;}
+  .nav-item:hover{background:var(--bg3);color:var(--text);}
+  .nav-item.active{background:var(--accent-bg);color:var(--accent);border:1px solid var(--accent-border);}
+  .nav-icon{font-size:15px;width:18px;text-align:center;}
+  .nav-badge{margin-left:auto;font-size:11px;font-family:'DM Mono',monospace;background:var(--bg4);color:var(--text2);padding:1px 6px;border-radius:99px;}
+  .nav-item.active .nav-badge{background:var(--accent-bg);color:var(--accent);}
+  .sidebar-footer{padding:14px 18px;border-top:1px solid var(--border);font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;}
+  .topbar{padding:14px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--bg2);flex-shrink:0;}
+  .topbar-title{font-size:16px;font-weight:600;}
+  .topbar-sub{font-size:12px;color:var(--text3);margin-top:1px;}
+  .topbar-actions{display:flex;gap:8px;align-items:center;}
+  .btn{padding:7px 14px;border-radius:var(--radius-sm);font-size:13px;font-family:'DM Sans',sans-serif;font-weight:500;cursor:pointer;border:1px solid var(--border2);background:var(--bg3);color:var(--text2);transition:all 0.15s;}
+  .btn:hover{background:var(--bg4);color:var(--text);}
+  .btn-primary{background:var(--accent-bg);color:var(--accent);border-color:var(--accent-border);}
+  .btn-primary:hover{background:rgba(79,142,247,0.18);}
+  .btn-green{background:var(--green-bg);color:var(--green);border-color:rgba(62,207,142,0.3);}
+  .btn-green:hover{background:rgba(62,207,142,0.18);}
+  .btn-danger{background:var(--red-bg);color:var(--red);border-color:rgba(245,101,101,0.3);}
+  .btn-danger:hover{background:rgba(245,101,101,0.18);}
+  .btn-sm{padding:5px 10px;font-size:12px;}
+  .view{display:none;flex:1;overflow:hidden;}
+  .view.active{display:flex;}
+  .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:20px 24px 0;flex-shrink:0;}
+  .stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;}
+  .stat-label{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;}
+  .stat-val{font-size:26px;font-weight:600;font-family:'DM Mono',monospace;}
+  .stat-val.blue{color:var(--accent);}.stat-val.amber{color:var(--amber);}.stat-val.green{color:var(--green);}.stat-val.white{color:var(--text);}
+  .cases-body{display:flex;flex:1;overflow:hidden;}
+  .cases-list-wrap{width:360px;flex-shrink:0;border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;}
+  .list-toolbar{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;gap:8px;flex-direction:column;}
+  .search-input{width:100%;padding:7px 10px;border-radius:var(--radius-sm);border:1px solid var(--border2);background:var(--bg3);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;}
+  .search-input::placeholder{color:var(--text3);}
+  .search-input:focus{border-color:var(--accent-border);}
+  .filter-pills{display:flex;gap:6px;flex-wrap:wrap;}
+  .pill{padding:4px 10px;border-radius:99px;font-size:11px;font-weight:500;border:1px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;transition:all 0.15s;}
+  .pill:hover{background:var(--bg3);}
+  .pill.active{background:var(--accent-bg);color:var(--accent);border-color:var(--accent-border);}
+  .case-list-scroll{overflow-y:auto;flex:1;}
+  .case-item{padding:13px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.12s;}
+  .case-item:hover{background:var(--bg3);}
+  .case-item.active{background:var(--accent-bg);border-left:2px solid var(--accent);}
+  .case-row1{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;}
+  .case-name{font-size:13px;font-weight:600;}
+  .case-meta{font-size:11px;color:var(--text3);display:flex;gap:10px;margin-top:3px;}
+  .badge{font-size:10px;padding:2px 7px;border-radius:99px;font-weight:600;letter-spacing:0.03em;text-transform:uppercase;}
+  .badge-new{background:var(--accent-bg);color:var(--accent);}
+  .badge-pending{background:var(--amber-bg);color:var(--amber);}
+  .badge-matched{background:var(--green-bg);color:var(--green);}
+  .badge-closed{background:var(--bg4);color:var(--text3);}
+  .detail-wrap{flex:1;overflow-y:auto;padding:20px 24px;display:flex;flex-direction:column;gap:16px;}
+  .detail-empty{flex:1;display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:13px;}
+  .dcard{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;}
+  .dcard-head{padding:10px 16px;border-bottom:1px solid var(--border);font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;display:flex;align-items:center;justify-content:space-between;}
+  .dcard-body{padding:16px;}
+  .fields-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .field{display:flex;flex-direction:column;gap:3px;}
+  .field label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;}
+  .field-val{font-size:13px;color:var(--text);}
+  .field-val a{color:var(--accent);text-decoration:none;}
+  .issue-text{background:var(--bg3);border-radius:var(--radius-sm);padding:10px 12px;font-size:13px;color:var(--text2);line-height:1.7;border:1px solid var(--border);}
+  .form-input{width:100%;padding:8px 10px;border-radius:var(--radius-sm);border:1px solid var(--border2);background:var(--bg3);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;}
+  .form-input:focus{border-color:var(--accent-border);}
+  .form-input::placeholder{color:var(--text3);}
+  textarea.form-input{resize:vertical;min-height:72px;}
+  select.form-input{cursor:pointer;}
+  .lawyer-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .lawyer-full{grid-column:1/-1;}
+  .save-bar{display:flex;gap:8px;justify-content:flex-end;margin-top:4px;}
+  .lawyers-body{flex:1;overflow:hidden;display:flex;flex-direction:column;}
+  .lawyers-toolbar{padding:16px 24px;border-bottom:1px solid var(--border);display:flex;gap:10px;align-items:center;flex-shrink:0;}
+  .lawyers-scroll{flex:1;overflow-y:auto;padding:20px 24px;}
+  .lawyers-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;}
+  .lawyer-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:16px;transition:border 0.15s;}
+  .lawyer-card:hover{border-color:var(--border2);}
+  .lc-top{display:flex;align-items:flex-start;gap:12px;margin-bottom:12px;}
+  .lc-avatar{width:40px;height:40px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;background:var(--accent-bg);color:var(--accent);}
+  .lc-name{font-size:14px;font-weight:600;}
+  .lc-firm{font-size:12px;color:var(--text3);margin-top:2px;}
+  .lc-fields{display:flex;flex-direction:column;gap:5px;margin-bottom:12px;}
+  .lc-field{font-size:12px;color:var(--text2);display:flex;gap:8px;}
+  .lc-field-label{color:var(--text3);min-width:50px;}
+  .lc-tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px;}
+  .lc-tag{font-size:10px;padding:2px 8px;border-radius:99px;background:var(--bg4);color:var(--text2);border:1px solid var(--border);}
+  .lc-actions{display:flex;gap:6px;}
+  .lawyer-empty{text-align:center;padding:60px 24px;color:var(--text3);font-size:13px;}
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:100;align-items:center;justify-content:center;}
+  .modal-overlay.open{display:flex;}
+  .modal{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius);padding:24px;width:520px;max-height:90vh;overflow-y:auto;}
+  .modal-title{font-size:16px;font-weight:600;margin-bottom:18px;}
+  .modal-fields{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px;}
+  .modal-full{grid-column:1/-1;}
+  .modal-label{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;display:block;}
+  .modal-actions{display:flex;gap:8px;justify-content:flex-end;}
+  .toast{position:fixed;bottom:24px;right:24px;background:var(--bg3);border:1px solid var(--green);color:var(--green);padding:10px 16px;border-radius:var(--radius-sm);font-size:13px;opacity:0;transform:translateY(8px);transition:all 0.2s;pointer-events:none;z-index:200;}
+  .toast.show{opacity:1;transform:translateY(0);}
+  ::-webkit-scrollbar{width:4px;}
+  ::-webkit-scrollbar-track{background:transparent;}
+  ::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:99px;}
+</style>
+</head>
+<body>
 
-			// Send lead to lawyer
-			document.querySelectorAll('.send-form').forEach((form) => {
-				const btn = form.querySelector('button')!;
-				btn.addEventListener('click', async () => {
-					const leadId = (form as HTMLElement).dataset.id;
-					const email = (form.querySelector('input') as HTMLInputElement).value;
-					if (!email) { alert('Enter a lawyer email first.'); return; }
-					btn.disabled = true;
-					btn.textContent = 'Sending...';
-					const res = await fetch('/api/send-lead', {
-						method: 'POST',
-						headers: { 'Content-Type': 'application/json' },
-						body: JSON.stringify({ lead_id: leadId, lawyer_email: email }),
-					});
-					if (res.ok) {
-						window.location.reload();
-					} else {
-						alert('Failed to send. Try again.');
-						btn.disabled = false;
-						btn.textContent = 'Send';
-					}
-				});
-			});
-		</script>
-	</body>
+{!isAuthed ? (
+<div class="login-screen">
+  <div class="login-box">
+    <h2>Admin Login</h2>
+    <input type="password" id="pw" placeholder="Password" />
+    <button id="btn">Log In</button>
+    <p id="login-err">Wrong password.</p>
+  </div>
+</div>
+) : (
+<div class="shell">
+  <div class="sidebar">
+    <div class="logo">
+      <div class="logo-title">Calidu Legal</div>
+      <div class="logo-sub">admin panel v1.0</div>
+    </div>
+    <nav class="nav">
+      <div class="nav-item active" onclick="switchView('cases',this)">
+        <span class="nav-icon">📋</span> Submissions
+        <span class="nav-badge" id="nb-cases">0</span>
+      </div>
+      <div class="nav-item" onclick="switchView('lawyers',this)">
+        <span class="nav-icon">⚖️</span> Lawyer Database
+        <span class="nav-badge" id="nb-lawyers">0</span>
+      </div>
+    </nav>
+    <div class="sidebar-footer" id="clock"></div>
+  </div>
+  <div class="main-area">
+    <div class="view active" id="view-cases" style="flex-direction:column;">
+      <div class="topbar">
+        <div><div class="topbar-title">Form Submissions</div><div class="topbar-sub" id="case-date"></div></div>
+        <div class="topbar-actions"><button class="btn btn-sm" onclick="exportCSV()">Export CSV</button></div>
+      </div>
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-label">Total</div><div class="stat-val white" id="s-total">0</div></div>
+        <div class="stat-card"><div class="stat-label">New</div><div class="stat-val blue" id="s-new">0</div></div>
+        <div class="stat-card"><div class="stat-label">Pending</div><div class="stat-val amber" id="s-pend">0</div></div>
+        <div class="stat-card"><div class="stat-label">Matched</div><div class="stat-val green" id="s-match">0</div></div>
+      </div>
+      <div class="cases-body" style="margin-top:16px;">
+        <div class="cases-list-wrap">
+          <div class="list-toolbar">
+            <input class="search-input" id="case-search" placeholder="Search name, city, type..." oninput="renderCases()" />
+            <div class="filter-pills">
+              <span class="pill active" onclick="setFilter('all',this)">All</span>
+              <span class="pill" onclick="setFilter('new',this)">New</span>
+              <span class="pill" onclick="setFilter('pending',this)">Pending</span>
+              <span class="pill" onclick="setFilter('matched',this)">Matched</span>
+              <span class="pill" onclick="setFilter('closed',this)">Closed</span>
+            </div>
+          </div>
+          <div class="case-list-scroll" id="case-list"></div>
+        </div>
+        <div id="case-detail" class="detail-wrap">
+          <div class="detail-empty">← Select a submission to view details</div>
+        </div>
+      </div>
+    </div>
+    <div class="view" id="view-lawyers" style="flex-direction:column;">
+      <div class="topbar">
+        <div><div class="topbar-title">Lawyer Database</div><div class="topbar-sub">All lawyers available for case matching</div></div>
+        <div class="topbar-actions"><button class="btn btn-primary" onclick="openLawyerModal()">+ Add Lawyer</button></div>
+      </div>
+      <div class="lawyers-body">
+        <div class="lawyers-toolbar">
+          <input class="search-input" style="max-width:280px;" id="lawyer-search" placeholder="Search name, firm, specialty..." oninput="renderLawyers()" />
+          <select class="form-input" style="max-width:180px;" id="specialty-filter" onchange="renderLawyers()">
+            <option value="">All specialties</option>
+            <option>Personal Injury</option><option>Employment</option><option>Family Law</option>
+            <option>Criminal Defense</option><option>Tenant Rights</option><option>Immigration</option>
+            <option>Business Law</option><option>Estate Planning</option><option>Civil Rights</option><option>Other</option>
+          </select>
+        </div>
+        <div class="lawyers-scroll"><div class="lawyers-grid" id="lawyer-grid"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+)}
+
+<div class="modal-overlay" id="lawyer-modal">
+  <div class="modal">
+    <div class="modal-title" id="modal-title">Add Lawyer</div>
+    <div class="modal-fields">
+      <div><label class="modal-label">Full name *</label><input class="form-input" id="ml-name" placeholder="David Reyes" /></div>
+      <div><label class="modal-label">Law firm</label><input class="form-input" id="ml-firm" placeholder="Reyes & Associates" /></div>
+      <div><label class="modal-label">Phone *</label><input class="form-input" id="ml-phone" placeholder="(251) 555-1122" /></div>
+      <div><label class="modal-label">Email</label><input class="form-input" id="ml-email" placeholder="dreyes@law.com" /></div>
+      <div><label class="modal-label">City / Area</label><input class="form-input" id="ml-city" placeholder="Los Angeles, CA" /></div>
+      <div><label class="modal-label">Specialty</label>
+        <select class="form-input" id="ml-specialty">
+          <option value="">Select specialty</option>
+          <option>Personal Injury</option><option>Employment</option><option>Family Law</option>
+          <option>Criminal Defense</option><option>Tenant Rights</option><option>Immigration</option>
+          <option>Business Law</option><option>Estate Planning</option><option>Civil Rights</option><option>Other</option>
+        </select>
+      </div>
+      <div class="modal-full"><label class="modal-label">Additional specialties (comma separated)</label><input class="form-input" id="ml-extras" placeholder="e.g. DUI, Traffic Violations" /></div>
+      <div class="modal-full"><label class="modal-label">Notes</label><textarea class="form-input" id="ml-notes" placeholder="Availability, languages spoken, consultation fees, etc."></textarea></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeLawyerModal()">Cancel</button>
+      <button class="btn btn-green" onclick="saveLawyer()">Save Lawyer</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script define:vars={{isAuthed}}>
+const AUTHED = isAuthed;
+
+// Login
+if (!AUTHED) {
+  const btn = document.getElementById('btn');
+  const pw = document.getElementById('pw');
+  if (btn) {
+    btn.addEventListener('click', async () => {
+      const res = await fetch('/api/admin-login', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({password: pw.value}) });
+      if (res.ok) { window.location.reload(); }
+      else { document.getElementById('login-err').style.display = 'block'; }
+    });
+    pw.addEventListener('keydown', e => { if (e.key === 'Enter') btn.click(); });
+  }
+}
+
+// Dashboard
+if (AUTHED) {
+  let cases = JSON.parse(localStorage.getItem('calidu_cases') || 'null') || [];
+  let lawyers = JSON.parse(localStorage.getItem('calidu_lawyers') || 'null') || [];
+  let nextCaseId = Math.max(...cases.map(c=>c.id), 0) + 1;
+  let nextLawyerId = Math.max(...lawyers.map(l=>l.id), 0) + 1;
+  let selectedCaseId = null;
+  let caseFilter = 'all';
+  let editingLawyerId = null;
+
+  function save() {
+    localStorage.setItem('calidu_cases', JSON.stringify(cases));
+    localStorage.setItem('calidu_lawyers', JSON.stringify(lawyers));
+  }
+  function switchView(view, el) {
+    document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+    document.getElementById('view-'+view).classList.add('active');
+    el.classList.add('active');
+  }
+  function setFilter(f, el) {
+    caseFilter=f;
+    document.querySelectorAll('.pill').forEach(p=>p.classList.remove('active'));
+    el.classList.add('active');
+    renderCases();
+  }
+  function renderCases() {
+    const q = document.getElementById('case-search').value.toLowerCase();
+    const filtered = cases.filter(c => {
+      const fm = caseFilter==='all' || c.status===caseFilter;
+      const sm = !q || c.name.toLowerCase().includes(q) || c.city.toLowerCase().includes(q) || c.type.toLowerCase().includes(q) || c.email.toLowerCase().includes(q);
+      return fm && sm;
+    });
+    document.getElementById('case-list').innerHTML = filtered.map(c=>`
+      <div class="case-item ${selectedCaseId===c.id?'active':''}" onclick="selectCase(${c.id})">
+        <div class="case-row1"><span class="case-name">${c.name}</span><span class="badge badge-${c.status}">${c.status}</span></div>
+        <div style="font-size:12px;color:var(--text2);margin:2px 0;">${c.type}</div>
+        <div class="case-meta"><span>${c.city}</span><span>${c.date}</span></div>
+      </div>`).join('') || '<div style="padding:24px;text-align:center;color:var(--text3);font-size:13px;">No submissions yet</div>';
+    updateStats(); updateBadges();
+  }
+  function selectCase(id) {
+    selectedCaseId=id; renderCases();
+    const c=cases.find(x=>x.id===id);
+    const ld=c.lawyer||{name:'',firm:'',phone:'',email:'',notes:''};
+    document.getElementById('case-detail').innerHTML=`
+      <div class="dcard"><div class="dcard-head"><span>Client info</span><span class="badge badge-${c.status}">${c.status}</span></div>
+        <div class="dcard-body"><div class="fields-grid">
+          <div class="field"><label>Full name</label><div class="field-val">${c.name}</div></div>
+          <div class="field"><label>Case type</label><div class="field-val">${c.type}</div></div>
+          <div class="field"><label>Email</label><div class="field-val"><a href="mailto:${c.email}">${c.email}</a></div></div>
+          <div class="field"><label>Phone</label><div class="field-val">${c.phone}</div></div>
+          <div class="field"><label>Location</label><div class="field-val">${c.city}</div></div>
+          <div class="field"><label>Submitted</label><div class="field-val">${c.date}</div></div>
+        </div></div></div>
+      <div class="dcard"><div class="dcard-head">Issue described</div>
+        <div class="dcard-body"><div class="issue-text">${c.issue}</div></div></div>
+      <div class="dcard"><div class="dcard-head">Lawyer assignment</div>
+        <div class="dcard-body"><div class="lawyer-grid">
+          <div><label class="modal-label" style="margin-bottom:4px;display:block;">Lawyer name</label><input class="form-input" id="al-name" value="${ld.name}" placeholder="Lawyer name" /></div>
+          <div><label class="modal-label" style="margin-bottom:4px;display:block;">Law firm</label><input class="form-input" id="al-firm" value="${ld.firm}" placeholder="Law firm" /></div>
+          <div><label class="modal-label" style="margin-bottom:4px;display:block;">Lawyer phone</label><input class="form-input" id="al-phone" value="${ld.phone}" placeholder="(xxx) xxx-xxxx" /></div>
+          <div><label class="modal-label" style="margin-bottom:4px;display:block;">Lawyer email</label><input class="form-input" id="al-email" value="${ld.email}" placeholder="lawyer@firm.com" /></div>
+          <div class="lawyer-full"><label class="modal-label" style="margin-bottom:4px;display:block;">Notes / Appointment info</label><textarea class="form-input" id="al-notes" placeholder="Appointment time, instructions...">${ld.notes}</textarea></div>
+          <div><label class="modal-label" style="margin-bottom:4px;display:block;">Update status</label>
+            <select class="form-input" id="al-status">
+              <option value="new" ${c.status==='new'?'selected':''}>New</option>
+              <option value="pending" ${c.status==='pending'?'selected':''}>Pending</option>
+              <option value="matched" ${c.status==='matched'?'selected':''}>Matched</option>
+              <option value="closed" ${c.status==='closed'?'selected':''}>Closed</option>
+            </select></div>
+          <div style="display:flex;align-items:flex-end;"><button class="btn btn-sm" onclick="pickFromDB(${id})" style="width:100%;">Pick from lawyer DB</button></div>
+        </div>
+        <div class="save-bar">
+          <button class="btn btn-sm btn-danger" onclick="deleteCase(${id})">Delete</button>
+          <button class="btn btn-sm btn-green" onclick="saveAssignment(${id})">Save assignment</button>
+        </div></div></div>`;
+  }
+  function saveAssignment(id) {
+    const c=cases.find(x=>x.id===id);
+    c.lawyer={name:document.getElementById('al-name').value,firm:document.getElementById('al-firm').value,phone:document.getElementById('al-phone').value,email:document.getElementById('al-email').value,notes:document.getElementById('al-notes').value};
+    c.status=document.getElementById('al-status').value;
+    save(); renderCases(); selectCase(id); toast('Assignment saved!');
+  }
+  function deleteCase(id) {
+    if (!confirm('Delete this submission?')) return;
+    cases=cases.filter(c=>c.id!==id); selectedCaseId=null; save(); renderCases();
+    document.getElementById('case-detail').innerHTML='<div class="detail-empty">← Select a submission to view details</div>';
+    toast('Submission deleted');
+  }
+  function pickFromDB(caseId) {
+    if (!lawyers.length) { alert('No lawyers in your database yet.'); return; }
+    const opts=lawyers.map((l,i)=>`${i+1}. ${l.name} — ${l.specialty} — ${l.city}`).join('\n');
+    const pick=prompt('Pick a lawyer by number:\n\n'+opts);
+    const idx=parseInt(pick)-1;
+    if (isNaN(idx)||idx<0||idx>=lawyers.length) return;
+    const l=lawyers[idx];
+    document.getElementById('al-name').value=l.name;
+    document.getElementById('al-firm').value=l.firm||'';
+    document.getElementById('al-phone').value=l.phone;
+    document.getElementById('al-email').value=l.email||'';
+    document.getElementById('al-notes').value=l.notes||'';
+    toast('Lawyer info filled in — save to confirm');
+  }
+  function updateStats() {
+    document.getElementById('s-total').textContent=cases.length;
+    document.getElementById('s-new').textContent=cases.filter(c=>c.status==='new').length;
+    document.getElementById('s-pend').textContent=cases.filter(c=>c.status==='pending').length;
+    document.getElementById('s-match').textContent=cases.filter(c=>c.status==='matched').length;
+  }
+  function exportCSV() {
+    const rows=[['Name','Email','Phone','City','Type','Status','Date','Lawyer','Lawyer Phone','Notes']];
+    cases.forEach(c=>rows.push([c.name,c.email,c.phone,c.city,c.type,c.status,c.date,c.lawyer?.name||'',c.lawyer?.phone||'',c.lawyer?.notes||'']));
+    const csv=rows.map(r=>r.map(v=>`"${(v||'').replace(/"/g,'""')}"`).join(',')).join('\n');
+    const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);a.download='calidu_submissions.csv';a.click();
+  }
+  function renderLawyers() {
+    const q=document.getElementById('lawyer-search').value.toLowerCase();
+    const sf=document.getElementById('specialty-filter').value;
+    const filtered=lawyers.filter(l=>{
+      const sm=!q||l.name.toLowerCase().includes(q)||(l.firm||'').toLowerCase().includes(q)||l.specialty.toLowerCase().includes(q)||(l.city||'').toLowerCase().includes(q);
+      const fm=!sf||l.specialty===sf;
+      return sm&&fm;
+    });
+    document.getElementById('lawyer-grid').innerHTML=filtered.map(l=>{
+      const initials=l.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+      const tags=[l.specialty,...(l.extras?l.extras.split(',').map(s=>s.trim()):[])].filter(Boolean);
+      return `<div class="lawyer-card">
+        <div class="lc-top"><div class="lc-avatar">${initials}</div><div><div class="lc-name">${l.name}</div><div class="lc-firm">${l.firm||'Independent'}</div></div></div>
+        <div class="lc-fields">
+          ${l.phone?`<div class="lc-field"><span class="lc-field-label">Phone</span>${l.phone}</div>`:''}
+          ${l.email?`<div class="lc-field"><span class="lc-field-label">Email</span>${l.email}</div>`:''}
+          ${l.city?`<div class="lc-field"><span class="lc-field-label">Area</span>${l.city}</div>`:''}
+          ${l.notes?`<div class="lc-field"><span class="lc-field-label">Notes</span>${l.notes}</div>`:''}
+        </div>
+        <div class="lc-tags">${tags.map(t=>`<span class="lc-tag">${t}</span>`).join('')}</div>
+        <div class="lc-actions"><button class="btn btn-sm" onclick="editLawyer(${l.id})">Edit</button><button class="btn btn-sm btn-danger" onclick="deleteLawyer(${l.id})">Remove</button></div>
+      </div>`;
+    }).join('')||'<div class="lawyer-empty">No lawyers found.<br>Add one using the button above.</div>';
+    updateBadges();
+  }
+  function openLawyerModal(id) {
+    editingLawyerId=id||null;
+    if (id) {
+      const l=lawyers.find(x=>x.id===id);
+      document.getElementById('modal-title').textContent='Edit Lawyer';
+      document.getElementById('ml-name').value=l.name;
+      document.getElementById('ml-firm').value=l.firm||'';
+      document.getElementById('ml-phone').value=l.phone;
+      document.getElementById('ml-email').value=l.email||'';
+      document.getElementById('ml-city').value=l.city||'';
+      document.getElementById('ml-specialty').value=l.specialty||'';
+      document.getElementById('ml-extras').value=l.extras||'';
+      document.getElementById('ml-notes').value=l.notes||'';
+    } else {
+      document.getElementById('modal-title').textContent='Add Lawyer';
+      ['ml-name','ml-firm','ml-phone','ml-email','ml-city','ml-extras','ml-notes'].forEach(id=>document.getElementById(id).value='');
+      document.getElementById('ml-specialty').value='';
+    }
+    document.getElementById('lawyer-modal').classList.add('open');
+  }
+  function editLawyer(id){openLawyerModal(id);}
+  function closeLawyerModal(){document.getElementById('lawyer-modal').classList.remove('open');editingLawyerId=null;}
+  function saveLawyer() {
+    const name=document.getElementById('ml-name').value.trim();
+    const phone=document.getElementById('ml-phone').value.trim();
+    if (!name||!phone){alert('Name and phone are required.');return;}
+    const data={name,phone,firm:document.getElementById('ml-firm').value.trim(),email:document.getElementById('ml-email').value.trim(),city:document.getElementById('ml-city').value.trim(),specialty:document.getElementById('ml-specialty').value,extras:document.getElementById('ml-extras').value.trim(),notes:document.getElementById('ml-notes').value.trim()};
+    if (editingLawyerId){const idx=lawyers.findIndex(l=>l.id===editingLawyerId);lawyers[idx]={...lawyers[idx],...data};}
+    else{data.id=nextLawyerId++;lawyers.push(data);}
+    save();closeLawyerModal();renderLawyers();toast(editingLawyerId?'Lawyer updated!':'Lawyer added!');
+  }
+  function deleteLawyer(id){
+    if (!confirm('Remove this lawyer?'))return;
+    lawyers=lawyers.filter(l=>l.id!==id);save();renderLawyers();toast('Lawyer removed');
+  }
+  function updateBadges(){
+    document.getElementById('nb-cases').textContent=cases.length;
+    document.getElementById('nb-lawyers').textContent=lawyers.length;
+  }
+  function toast(msg){
+    const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
+    setTimeout(()=>t.classList.remove('show'),2500);
+  }
+  function updateClock(){
+    const now=new Date();
+    document.getElementById('clock').textContent=now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+    document.getElementById('case-date').textContent=now.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+  }
+  document.getElementById('lawyer-modal').addEventListener('click',function(e){if(e.target===this)closeLawyerModal();});
+  renderCases();renderLawyers();updateClock();setInterval(updateClock,10000);
+
+  // Make functions global for onclick handlers
+  window.switchView=switchView;window.setFilter=setFilter;window.selectCase=selectCase;
+  window.saveAssignment=saveAssignment;window.deleteCase=deleteCase;window.pickFromDB=pickFromDB;
+  window.exportCSV=exportCSV;window.renderCases=renderCases;window.renderLawyers=renderLawyers;
+  window.openLawyerModal=openLawyerModal;window.editLawyer=editLawyer;window.closeLawyerModal=closeLawyerModal;
+  window.saveLawyer=saveLawyer;window.deleteLawyer=deleteLawyer;
+}
+</script>
+</body>
 </html>
