@@ -1,0 +1,446 @@
+---
+export const prerender = true;
+import BaseHead from '../components/BaseHead.astro';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import CookieBanner from '../components/CookieBanner.astro';
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <BaseHead
+      title="BAC Calculator — Estimate Your Blood Alcohol Content | CaliDUIHelp"
+      description="Use this BAC estimator to understand how drinks, weight, and time affect your blood alcohol level. For educational purposes only — not a substitute for a breathalyzer."
+    />
+    <style>
+      main {
+        width: 720px;
+        max-width: calc(100% - 2em);
+        margin: auto;
+        padding: 3em 1em;
+      }
+      .disclaimer {
+        background: #fff8e1;
+        border-left: 4px solid #f59e0b;
+        padding: 0.75em 1em;
+        border-radius: 4px;
+        font-size: 0.9em;
+        color: #7c6400;
+        margin-bottom: 2em;
+      }
+      h1 { font-size: 1.6em; margin-bottom: 0.3em; }
+      .subtitle { color: rgb(var(--gray)); font-size: 0.95em; margin-bottom: 2em; }
+
+      .calc-card {
+        background: #f8fafc;
+        border: 1px solid rgb(var(--gray-light));
+        border-radius: 12px;
+        padding: 2em;
+        margin-bottom: 2em;
+      }
+      .form-group {
+        margin-bottom: 1.4em;
+      }
+      label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 0.4em;
+        font-size: 0.95em;
+      }
+      .label-hint {
+        font-weight: 400;
+        color: rgb(var(--gray));
+        font-size: 0.85em;
+        margin-left: 0.4em;
+      }
+      input[type="number"], select {
+        width: 100%;
+        padding: 0.65em 0.9em;
+        border: 1.5px solid rgb(var(--gray-light));
+        border-radius: 6px;
+        font-size: 1em;
+        background: white;
+        box-sizing: border-box;
+        transition: border-color 0.2s;
+      }
+      input[type="number"]:focus, select:focus {
+        outline: none;
+        border-color: #2337ff;
+      }
+      .drink-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 0.6em;
+        margin-top: 0.5em;
+      }
+      .drink-btn {
+        background: white;
+        border: 1.5px solid rgb(var(--gray-light));
+        border-radius: 8px;
+        padding: 0.7em 0.5em;
+        cursor: pointer;
+        font-size: 0.85em;
+        text-align: center;
+        transition: all 0.15s;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+      }
+      .drink-btn:hover { border-color: #2337ff; background: #f0f4ff; }
+      .drink-btn.selected { border-color: #2337ff; background: #e0e7ff; font-weight: 600; }
+      .drink-btn .icon { font-size: 1.5em; }
+      .drink-btn .drink-name { font-size: 0.8em; }
+      .drink-btn .drink-oz { font-size: 0.75em; color: rgb(var(--gray)); }
+
+      .calc-btn {
+        width: 100%;
+        background: #2337ff;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 0.9em;
+        font-size: 1em;
+        font-weight: 700;
+        cursor: pointer;
+        transition: background 0.2s;
+        margin-top: 0.5em;
+      }
+      .calc-btn:hover { background: #1a28d9; }
+
+      #result {
+        display: none;
+        margin-top: 1.5em;
+      }
+      .bac-display {
+        text-align: center;
+        padding: 1.5em;
+        border-radius: 10px;
+        margin-bottom: 1em;
+      }
+      .bac-number {
+        font-size: 3.5em;
+        font-weight: 900;
+        line-height: 1;
+        margin-bottom: 0.1em;
+      }
+      .bac-label { font-size: 0.95em; opacity: 0.8; }
+      .bac-safe { background: #f0fdf4; border: 2px solid #16a34a; color: #14532d; }
+      .bac-caution { background: #fefce8; border: 2px solid #ca8a04; color: #713f12; }
+      .bac-illegal { background: #fff0f0; border: 2px solid #dc2626; color: #7f1d1d; }
+
+      .result-details {
+        background: white;
+        border: 1px solid rgb(var(--gray-light));
+        border-radius: 8px;
+        padding: 1.2em 1.4em;
+        font-size: 0.9em;
+        line-height: 1.7;
+      }
+      .result-details h3 { font-size: 1em; margin-bottom: 0.6em; }
+      .result-details ul { padding-left: 1.2em; margin: 0; }
+      .result-details li { margin-bottom: 0.3em; }
+
+      .sober-time {
+        background: #f0f4ff;
+        border-left: 4px solid #2337ff;
+        padding: 0.75em 1em;
+        border-radius: 4px;
+        margin-top: 1em;
+        font-size: 0.9em;
+      }
+
+      .counter-row {
+        display: flex;
+        align-items: center;
+        gap: 0.8em;
+        margin-top: 0.5em;
+      }
+      .counter-btn {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        border: 1.5px solid rgb(var(--gray-light));
+        background: white;
+        font-size: 1.2em;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        transition: all 0.15s;
+        flex-shrink: 0;
+      }
+      .counter-btn:hover { border-color: #2337ff; background: #f0f4ff; }
+      .counter-display {
+        font-size: 1.4em;
+        font-weight: 700;
+        min-width: 2em;
+        text-align: center;
+      }
+
+      .info-section { margin-top: 2.5em; }
+      .info-section h2 { font-size: 1.1em; margin-bottom: 0.8em; }
+      .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1em;
+        margin-top: 1em;
+      }
+      .info-card {
+        background: #f8fafc;
+        border: 1px solid rgb(var(--gray-light));
+        border-radius: 8px;
+        padding: 1em 1.2em;
+        font-size: 0.88em;
+        line-height: 1.6;
+      }
+      .info-card strong { display: block; margin-bottom: 0.3em; }
+
+      @media (max-width: 480px) {
+        .drink-grid { grid-template-columns: repeat(2, 1fr); }
+      }
+    </style>
+  </head>
+  <body>
+    <Header />
+    <main>
+      <div class="disclaimer">
+        <strong>Educational only — not a breathalyzer.</strong> This calculator uses a standard formula that gives a rough estimate. Actual BAC depends on metabolism, medications, food, hydration, and more. Never rely on this to decide whether to drive.
+      </div>
+
+      <h1>BAC Estimator</h1>
+      <p class="subtitle">Get a rough idea of where your blood alcohol might be based on what you drank, your weight, and how long ago you started drinking.</p>
+
+      <div class="calc-card">
+        <div class="form-group">
+          <label>What did you drink? <span class="label-hint">Select type, then count</span></label>
+          <div class="drink-grid">
+            <button class="drink-btn selected" data-oz="0.6" data-type="beer">
+              <span class="icon">🍺</span>
+              <span class="drink-name">Beer</span>
+              <span class="drink-oz">12oz / 5%</span>
+            </button>
+            <button class="drink-btn" data-oz="0.6" data-type="wine">
+              <span class="icon">🍷</span>
+              <span class="drink-name">Wine</span>
+              <span class="drink-oz">5oz / 12%</span>
+            </button>
+            <button class="drink-btn" data-oz="0.6" data-type="shot">
+              <span class="icon">🥃</span>
+              <span class="drink-name">Shot</span>
+              <span class="drink-oz">1.5oz / 40%</span>
+            </button>
+            <button class="drink-btn" data-oz="1.0" data-type="strong">
+              <span class="icon">🍹</span>
+              <span class="drink-name">Strong Cocktail</span>
+              <span class="drink-oz">~2 shots</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Number of drinks</label>
+          <div class="counter-row">
+            <button class="counter-btn" id="drinks-minus">−</button>
+            <span class="counter-display" id="drinks-display">2</span>
+            <button class="counter-btn" id="drinks-plus">+</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Your weight</label>
+          <div style="display:flex; gap:0.6em; align-items:center;">
+            <input type="number" id="weight" value="160" min="80" max="400" style="max-width:120px;" />
+            <select id="weight-unit" style="max-width:100px;">
+              <option value="lbs">lbs</option>
+              <option value="kg">kg</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Biological sex <span class="label-hint">(affects alcohol metabolism)</span></label>
+          <select id="sex">
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Hours since you started drinking</label>
+          <div class="counter-row">
+            <button class="counter-btn" id="hours-minus">−</button>
+            <span class="counter-display" id="hours-display">2</span>
+            <button class="counter-btn" id="hours-plus">+</button>
+          </div>
+        </div>
+
+        <button class="calc-btn" id="calc-btn">Calculate Estimated BAC</button>
+
+        <div id="result">
+          <div class="bac-display" id="bac-display">
+            <div class="bac-number" id="bac-number">0.00%</div>
+            <div class="bac-label" id="bac-label"></div>
+          </div>
+          <div class="result-details" id="result-details"></div>
+          <div class="sober-time" id="sober-time"></div>
+        </div>
+      </div>
+
+      <div class="info-section">
+        <h2>California BAC Limits</h2>
+        <div class="info-grid">
+          <div class="info-card">
+            <strong>0.08% — Standard limit</strong>
+            Drivers 21+ are legally impaired at or above this level. Arrest is legal even without obvious impairment.
+          </div>
+          <div class="info-card">
+            <strong>0.04% — Commercial drivers</strong>
+            CDL holders (truck drivers, bus drivers) face DUI arrest at just half the normal limit.
+          </div>
+          <div class="info-card">
+            <strong>0.01% — Under 21</strong>
+            California has a zero-tolerance policy. Any detectable alcohol while under 21 triggers license suspension.
+          </div>
+          <div class="info-card">
+            <strong>Any amount — DUI probation</strong>
+            If you're on DUI probation, you cannot drive with any alcohol in your system at all.
+          </div>
+        </div>
+      </div>
+
+      <div class="info-section">
+        <h2>What Affects BAC (Beyond This Calculator)</h2>
+        <div class="result-details">
+          <ul>
+            <li><strong>Food:</strong> Eating a full meal before drinking slows absorption significantly. An empty stomach absorbs alcohol much faster.</li>
+            <li><strong>Drinking speed:</strong> Pounding drinks raises BAC faster than sipping over time.</li>
+            <li><strong>Medications:</strong> Many medications interact with alcohol and can dramatically increase impairment even at low BAC levels.</li>
+            <li><strong>Fatigue:</strong> Being tired amplifies alcohol's effects on driving ability even without changing your BAC.</li>
+            <li><strong>Tolerance:</strong> High tolerance makes you feel more sober — your BAC is exactly the same.</li>
+            <li><strong>Hydration:</strong> Dehydration concentrates alcohol in your bloodstream faster.</li>
+          </ul>
+        </div>
+      </div>
+    </main>
+    <CookieBanner />
+    <Footer />
+
+    <script>
+      let drinkOz = 0.6;
+      let numDrinks = 2;
+      let numHours = 2;
+
+      const drinksDisplay = document.getElementById('drinks-display');
+      const hoursDisplay = document.getElementById('hours-display');
+
+      document.querySelectorAll('.drink-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.drink-btn').forEach(b => b.classList.remove('selected'));
+          btn.classList.add('selected');
+          drinkOz = parseFloat(btn.dataset.oz);
+        });
+      });
+
+      document.getElementById('drinks-minus').addEventListener('click', () => {
+        if (numDrinks > 1) { numDrinks--; drinksDisplay.textContent = numDrinks; }
+      });
+      document.getElementById('drinks-plus').addEventListener('click', () => {
+        if (numDrinks < 20) { numDrinks++; drinksDisplay.textContent = numDrinks; }
+      });
+      document.getElementById('hours-minus').addEventListener('click', () => {
+        if (numHours > 0) { numHours--; hoursDisplay.textContent = numHours; }
+      });
+      document.getElementById('hours-plus').addEventListener('click', () => {
+        if (numHours < 12) { numHours++; hoursDisplay.textContent = numHours; }
+      });
+
+      document.getElementById('calc-btn').addEventListener('click', () => {
+        const weightInput = parseFloat(document.getElementById('weight').value);
+        const weightUnit = document.getElementById('weight-unit').value;
+        const sex = document.getElementById('sex').value;
+
+        const weightLbs = weightUnit === 'kg' ? weightInput * 2.20462 : weightInput;
+        const weightGrams = weightLbs * 453.592;
+
+        const distributionRatio = sex === 'male' ? 0.68 : 0.55;
+        const totalAlcoholOz = numDrinks * drinkOz;
+        const totalAlcoholGrams = totalAlcoholOz * 29.5735 * 0.789;
+
+        let bac = (totalAlcoholGrams / (weightGrams * distributionRatio)) * 100;
+        bac = bac - (numHours * 0.015);
+        bac = Math.max(0, bac);
+        bac = Math.round(bac * 1000) / 1000;
+
+        const bacDisplay = document.getElementById('bac-display');
+        const bacNumber = document.getElementById('bac-number');
+        const bacLabel = document.getElementById('bac-label');
+        const resultDetails = document.getElementById('result-details');
+        const soberTime = document.getElementById('sober-time');
+        const result = document.getElementById('result');
+
+        bacNumber.textContent = bac.toFixed(3) + '%';
+        bacDisplay.className = 'bac-display';
+
+        let detailsHtml = '';
+        let soberHours = Math.ceil(bac / 0.015);
+
+        if (bac === 0) {
+          bacDisplay.classList.add('bac-safe');
+          bacLabel.textContent = 'Below detectable level (estimated)';
+          detailsHtml = `<h3>What this means</h3><ul>
+            <li>Based on this estimate, your BAC has likely returned to near zero.</li>
+            <li>Remember: this is a rough formula — actual BAC can vary significantly.</li>
+            <li>If you feel any impairment at all, wait longer or get a ride.</li>
+          </ul>`;
+          soberTime.textContent = '✓ Estimated sober based on the numbers entered. This is not a guarantee.';
+        } else if (bac < 0.05) {
+          bacDisplay.classList.add('bac-safe');
+          bacLabel.textContent = 'Below legal limit — but impairment possible';
+          detailsHtml = `<h3>What this means</h3><ul>
+            <li>Your estimated BAC is below California's 0.08% legal limit.</li>
+            <li>However, California can still charge DUI at any BAC if impairment is observed.</li>
+            <li>Under 21? Any detectable alcohol is a violation.</li>
+            <li>On DUI probation? Zero tolerance applies — don't drive.</li>
+          </ul>`;
+          soberTime.textContent = `⏱ Estimated ${soberHours} more hour${soberHours !== 1 ? 's' : ''} to fully metabolize at standard rate.`;
+        } else if (bac < 0.08) {
+          bacDisplay.classList.add('bac-caution');
+          bacLabel.textContent = 'Caution zone — approaching legal limit';
+          detailsHtml = `<h3>What this means</h3><ul>
+            <li>You're below 0.08% but in a range where judgment and reaction time are affected.</li>
+            <li>Driving at this level is legal for most adults — but risky. Small changes in metabolism, food, or timing could push you over.</li>
+            <li>Officers can still charge DUI based on observed impairment even below 0.08%.</li>
+            <li>Under 21 or on DUI probation: do not drive at this level.</li>
+          </ul>`;
+          soberTime.textContent = `⏱ Estimated ${soberHours} more hour${soberHours !== 1 ? 's' : ''} to reach 0.00%.`;
+        } else if (bac < 0.15) {
+          bacDisplay.classList.add('bac-illegal');
+          bacLabel.textContent = 'Over legal limit — do not drive';
+          detailsHtml = `<h3>What this means</h3><ul>
+            <li>Your estimated BAC is above California's 0.08% legal limit. Do not drive.</li>
+            <li>At 0.08–0.15%, impairment includes: reduced coordination, slower reaction time, poor judgment, divided attention problems.</li>
+            <li>A DUI arrest at this level is a standard first-offense misdemeanor — but still serious.</li>
+            <li>Get a ride. The cost of a DUI far exceeds any Uber or Lyft fare.</li>
+          </ul>`;
+          soberTime.textContent = `⏱ Estimated ${soberHours} more hour${soberHours !== 1 ? 's' : ''} to get below 0.08%. Get a ride home.`;
+        } else {
+          bacDisplay.classList.add('bac-illegal');
+          bacLabel.textContent = 'Significantly over limit — enhanced DUI territory';
+          detailsHtml = `<h3>What this means</h3><ul>
+            <li>At 0.15% or above, California applies enhanced DUI penalties — longer DUI school (9 months), higher fines, less flexibility from prosecutors.</li>
+            <li>Impairment at this level is severe: slurred speech, loss of coordination, significantly slowed reaction time.</li>
+            <li>Do not drive. Do not consider driving. Get a ride or stay where you are.</li>
+          </ul>`;
+          soberTime.textContent = `⏱ Estimated ${soberHours} more hour${soberHours !== 1 ? 's' : ''} to get below 0.08%. Do not drive.`;
+        }
+
+        resultDetails.innerHTML = detailsHtml;
+        result.style.display = 'block';
+        result.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      });
+    </script>
+  </body>
+</html>

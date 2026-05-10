@@ -1,0 +1,493 @@
+---
+export const prerender = true;
+import BaseHead from '../components/BaseHead.astro';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import CookieBanner from '../components/CookieBanner.astro';
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <BaseHead
+      title="What Should I Do First After a California DUI Arrest?"
+      description="A step-by-step interactive guide for what to do immediately after a DUI arrest in California. Don't miss the 10-day DMV deadline."
+    />
+    <style>
+      main {
+        width: 720px;
+        max-width: calc(100% - 2em);
+        margin: auto;
+        padding: 3em 1em;
+      }
+      .disclaimer {
+        background: #fff8e1;
+        border-left: 4px solid #f59e0b;
+        padding: 0.75em 1em;
+        border-radius: 4px;
+        font-size: 0.9em;
+        color: #7c6400;
+        margin-bottom: 2em;
+      }
+      h1 { font-size: 1.6em; margin-bottom: 0.3em; }
+      .subtitle { color: rgb(var(--gray)); font-size: 0.95em; margin-bottom: 2em; }
+
+      .quiz-container {
+        background: #f8fafc;
+        border: 1px solid rgb(var(--gray-light));
+        border-radius: 12px;
+        padding: 2em;
+        margin-bottom: 2em;
+        min-height: 300px;
+      }
+
+      .step { display: none; }
+      .step.active { display: block; }
+
+      .step-badge {
+        display: inline-block;
+        background: #2337ff;
+        color: white;
+        font-size: 0.75em;
+        font-weight: 700;
+        padding: 0.2em 0.7em;
+        border-radius: 20px;
+        margin-bottom: 0.8em;
+        letter-spacing: 0.04em;
+      }
+      .step h2 { font-size: 1.2em; margin-bottom: 0.6em; line-height: 1.3; }
+      .step p { font-size: 0.95em; color: rgb(var(--gray-dark)); line-height: 1.7; margin-bottom: 1em; }
+
+      .choices { display: flex; flex-direction: column; gap: 0.7em; margin-top: 1.2em; }
+      .choice-btn {
+        background: white;
+        border: 1.5px solid rgb(var(--gray-light));
+        border-radius: 8px;
+        padding: 0.9em 1.2em;
+        text-align: left;
+        cursor: pointer;
+        font-size: 0.95em;
+        line-height: 1.5;
+        transition: all 0.15s;
+        color: rgb(var(--black));
+      }
+      .choice-btn:hover { border-color: #2337ff; background: #f0f4ff; }
+      .choice-btn strong { display: block; }
+      .choice-btn small { color: rgb(var(--gray)); font-size: 0.88em; }
+
+      .next-btn {
+        background: #2337ff;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 0.75em 1.8em;
+        font-size: 0.95em;
+        font-weight: 700;
+        cursor: pointer;
+        transition: background 0.2s;
+        margin-top: 1em;
+      }
+      .next-btn:hover { background: #1a28d9; }
+
+      .callout-urgent {
+        background: #fff0f0;
+        border-left: 4px solid #dc2626;
+        padding: 0.8em 1em;
+        border-radius: 4px;
+        font-size: 0.9em;
+        font-weight: 600;
+        color: #7f1d1d;
+        margin: 1em 0;
+      }
+      .callout-blue {
+        background: #f0f4ff;
+        border-left: 4px solid #2337ff;
+        padding: 0.8em 1em;
+        border-radius: 4px;
+        font-size: 0.9em;
+        line-height: 1.6;
+        margin: 1em 0;
+      }
+      .callout-green {
+        background: #f0fdf4;
+        border-left: 4px solid #16a34a;
+        padding: 0.8em 1em;
+        border-radius: 4px;
+        font-size: 0.9em;
+        line-height: 1.6;
+        margin: 1em 0;
+      }
+
+      .progress-bar {
+        display: flex;
+        gap: 4px;
+        margin-bottom: 1.5em;
+      }
+      .progress-dot {
+        height: 4px;
+        border-radius: 2px;
+        flex: 1;
+        background: rgb(var(--gray-light));
+        transition: background 0.3s;
+      }
+      .progress-dot.done { background: #2337ff; }
+
+      .checklist {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+      .checklist li {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.8em;
+        padding: 0.7em 0;
+        border-bottom: 1px solid rgb(var(--gray-light));
+        font-size: 0.93em;
+        line-height: 1.5;
+        cursor: pointer;
+      }
+      .checklist li:last-child { border-bottom: none; }
+      .check-box {
+        width: 20px;
+        height: 20px;
+        border: 2px solid rgb(var(--gray-light));
+        border-radius: 4px;
+        flex-shrink: 0;
+        margin-top: 2px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8em;
+        transition: all 0.15s;
+      }
+      .checklist li.checked .check-box {
+        background: #16a34a;
+        border-color: #16a34a;
+        color: white;
+      }
+      .checklist li.checked .check-text { text-decoration: line-through; color: rgb(var(--gray)); }
+
+      .restart-btn {
+        background: transparent;
+        border: 1.5px solid rgb(var(--gray-light));
+        border-radius: 8px;
+        padding: 0.6em 1.4em;
+        font-size: 0.9em;
+        cursor: pointer;
+        margin-top: 1em;
+        color: rgb(var(--gray-dark));
+        transition: all 0.15s;
+      }
+      .restart-btn:hover { border-color: #2337ff; color: #2337ff; }
+
+      .answer-summary {
+        background: white;
+        border: 1px solid rgb(var(--gray-light));
+        border-radius: 8px;
+        padding: 1em 1.2em;
+        margin-bottom: 1em;
+        font-size: 0.88em;
+        color: rgb(var(--gray));
+      }
+      .answer-summary strong { color: rgb(var(--gray-dark)); }
+    </style>
+  </head>
+  <body>
+    <Header />
+    <main>
+      <div class="disclaimer">
+        <strong>Not legal advice.</strong> This guide covers the most common situations. Your case may be different. Consult a licensed California attorney for advice specific to your situation.
+      </div>
+
+      <h1>What Should I Do First?</h1>
+      <p class="subtitle">Answer a few quick questions and we'll give you a prioritized action plan for the next 10 days.</p>
+
+      <div class="quiz-container">
+        <div class="progress-bar" id="progress-bar">
+          <div class="progress-dot done" id="dot-0"></div>
+          <div class="progress-dot" id="dot-1"></div>
+          <div class="progress-dot" id="dot-2"></div>
+          <div class="progress-dot" id="dot-3"></div>
+          <div class="progress-dot" id="dot-4"></div>
+        </div>
+
+        <!-- Step 0: When was the arrest -->
+        <div class="step active" id="step-0">
+          <div class="step-badge">Question 1 of 4</div>
+          <h2>When were you (or the person you're helping) arrested?</h2>
+          <p>The most important deadline in a California DUI is 10 days from arrest. Your answer changes what we tell you first.</p>
+          <div class="choices">
+            <button class="choice-btn" onclick="answer(0, 'today')">
+              <strong>Today or yesterday</strong>
+              <small>Less than 48 hours ago</small>
+            </button>
+            <button class="choice-btn" onclick="answer(0, 'recent')">
+              <strong>2–7 days ago</strong>
+              <small>Still within the 10-day window</small>
+            </button>
+            <button class="choice-btn" onclick="answer(0, 'almost')">
+              <strong>8–10 days ago</strong>
+              <small>Right at the deadline — urgent</small>
+            </button>
+            <button class="choice-btn" onclick="answer(0, 'past')">
+              <strong>More than 10 days ago</strong>
+              <small>The DMV deadline has passed</small>
+            </button>
+          </div>
+        </div>
+
+        <!-- Step 1: DUI test -->
+        <div class="step" id="step-1">
+          <div class="step-badge">Question 2 of 4</div>
+          <h2>Did you take the chemical test (breath or blood)?</h2>
+          <p>This affects both the DMV side of your case and what your attorney can argue in court.</p>
+          <div class="choices">
+            <button class="choice-btn" onclick="answer(1, 'breathalyzer')">
+              <strong>Yes — breathalyzer</strong>
+              <small>I blew into a device at the station</small>
+            </button>
+            <button class="choice-btn" onclick="answer(1, 'blood')">
+              <strong>Yes — blood test</strong>
+              <small>They drew blood at the station or hospital</small>
+            </button>
+            <button class="choice-btn" onclick="answer(1, 'refused')">
+              <strong>No — I refused</strong>
+              <small>I said no to both breath and blood</small>
+            </button>
+            <button class="choice-btn" onclick="answer(1, 'unsure')">
+              <strong>Not sure</strong>
+              <small>I don't remember clearly</small>
+            </button>
+          </div>
+        </div>
+
+        <!-- Step 2: Offense number -->
+        <div class="step" id="step-2">
+          <div class="step-badge">Question 3 of 4</div>
+          <h2>Have you had a prior DUI or wet reckless in California in the last 10 years?</h2>
+          <p>This determines whether you're looking at first-offense or repeat-offense penalties — which are very different.</p>
+          <div class="choices">
+            <button class="choice-btn" onclick="answer(2, 'first')">
+              <strong>No — this is my first</strong>
+              <small>No prior DUI or wet reckless in last 10 years</small>
+            </button>
+            <button class="choice-btn" onclick="answer(2, 'second')">
+              <strong>Yes — I have one prior</strong>
+              <small>One previous DUI or wet reckless</small>
+            </button>
+            <button class="choice-btn" onclick="answer(2, 'multiple')">
+              <strong>Yes — two or more priors</strong>
+              <small>Multiple previous DUI-related convictions</small>
+            </button>
+            <button class="choice-btn" onclick="answer(2, 'unsure')">
+              <strong>I'm not sure</strong>
+              <small>There may be something on my record</small>
+            </button>
+          </div>
+        </div>
+
+        <!-- Step 3: Injury or accident -->
+        <div class="step" id="step-3">
+          <div class="step-badge">Question 4 of 4</div>
+          <h2>Was anyone hurt, or was there an accident?</h2>
+          <div class="choices">
+            <button class="choice-btn" onclick="answer(3, 'none')">
+              <strong>No — no accident or injury</strong>
+              <small>Standard stop, no collision</small>
+            </button>
+            <button class="choice-btn" onclick="answer(3, 'property')">
+              <strong>Property damage only</strong>
+              <small>Fender bender, fence, parked car, etc.</small>
+            </button>
+            <button class="choice-btn" onclick="answer(3, 'injury')">
+              <strong>Someone was injured</strong>
+              <small>Any person was hurt</small>
+            </button>
+          </div>
+        </div>
+
+        <!-- Step 4: Results -->
+        <div class="step" id="step-4">
+          <div class="step-badge">Your Action Plan</div>
+          <h2 id="result-headline">Here's what to do right now</h2>
+          <div id="result-content"></div>
+          <button class="restart-btn" onclick="restart()">← Start over</button>
+        </div>
+      </div>
+
+      <div style="margin-top:2em;">
+        <h2 style="font-size:1.1em; margin-bottom:0.8em;">More Resources</h2>
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap:0.8em;">
+          <a href="/dmv-hearing" style="display:block; background:#f8fafc; border:1px solid rgb(var(--gray-light)); border-radius:8px; padding:1em 1.2em; text-decoration:none; color:rgb(var(--gray-dark)); font-size:0.9em; transition:background 0.15s;">
+            <strong style="display:block; margin-bottom:0.2em; color:rgb(var(--black));">DMV Hearing Guide →</strong>
+            How to request it, what to expect, how to fight back
+          </a>
+          <a href="/bac-calculator" style="display:block; background:#f8fafc; border:1px solid rgb(var(--gray-light)); border-radius:8px; padding:1em 1.2em; text-decoration:none; color:rgb(var(--gray-dark)); font-size:0.9em; transition:background 0.15s;">
+            <strong style="display:block; margin-bottom:0.2em; color:rgb(var(--black));">BAC Calculator →</strong>
+            Understand how blood alcohol works
+          </a>
+          <a href="/cost-estimator" style="display:block; background:#f8fafc; border:1px solid rgb(var(--gray-light)); border-radius:8px; padding:1em 1.2em; text-decoration:none; color:rgb(var(--gray-dark)); font-size:0.9em; transition:background 0.15s;">
+            <strong style="display:block; margin-bottom:0.2em; color:rgb(var(--black));">Cost Estimator →</strong>
+            What will this actually cost you?
+          </a>
+        </div>
+      </div>
+    </main>
+    <CookieBanner />
+    <Footer />
+
+    <script>
+      const answers = {};
+      const totalSteps = 5;
+
+      function updateProgress(currentStep) {
+        for (let i = 0; i < totalSteps; i++) {
+          const dot = document.getElementById('dot-' + i);
+          if (dot) dot.classList.toggle('done', i <= currentStep);
+        }
+      }
+
+      function answer(step, value) {
+        answers[step] = value;
+        const currentStep = document.getElementById('step-' + step);
+        const nextStep = document.getElementById('step-' + (step + 1));
+        if (currentStep) currentStep.classList.remove('active');
+
+        if (step === 3) {
+          // Last question — show results
+          showResults();
+          if (nextStep) nextStep.classList.add('active');
+          updateProgress(4);
+        } else {
+          if (nextStep) nextStep.classList.add('active');
+          updateProgress(step + 1);
+        }
+      }
+
+      function restart() {
+        Object.keys(answers).forEach(k => delete answers[k]);
+        document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+        document.getElementById('step-0').classList.add('active');
+        updateProgress(0);
+      }
+
+      function showResults() {
+        const timing = answers[0];
+        const test = answers[1];
+        const offense = answers[2];
+        const accident = answers[3];
+
+        let headline = 'Your immediate action plan';
+        let html = '';
+
+        // Build summary
+        const offenseLabel = offense === 'first' ? 'First offense' : offense === 'second' ? 'Second offense' : offense === 'multiple' ? 'Third+ offense' : 'Unclear record';
+        const testLabel = test === 'breathalyzer' ? 'Breathalyzer taken' : test === 'blood' ? 'Blood test taken' : test === 'refused' ? 'Test refused' : 'Test status unclear';
+        const accidentLabel = accident === 'none' ? 'No accident' : accident === 'property' ? 'Property damage' : 'Injury involved';
+
+        html += `<div class="answer-summary">
+          <strong>Your situation:</strong> ${offenseLabel} · ${testLabel} · ${accidentLabel}
+        </div>`;
+
+        // DMV deadline urgency
+        if (timing === 'today' || timing === 'recent') {
+          html += `<div class="callout-urgent">🚨 Priority #1: Call the DMV Driver Safety Office TODAY to request your APS hearing. You have 10 days from arrest — don't wait.</div>`;
+        } else if (timing === 'almost') {
+          html += `<div class="callout-urgent">🚨 URGENT: You have 8–10 days from arrest, which means you may have 0–2 days left to request your DMV hearing. Call immediately.</div>`;
+        } else if (timing === 'past') {
+          html += `<div class="callout-blue">ℹ️ The 10-day DMV hearing window has likely passed, which means your license suspension is probably now automatic. You may still be able to request a departmental review, and your criminal court case is still separate. Focus on your attorney now.</div>`;
+        }
+
+        // Checklist
+        const items = [];
+
+        if (timing !== 'past') {
+          items.push({
+            urgent: true,
+            title: 'Call the DMV Driver Safety Office to request your APS hearing',
+            detail: 'Find your local office at dmv.ca.gov or call 1-800-777-0133. Say: "I\'d like to request an APS hearing. I was arrested on [date]."'
+          });
+        }
+
+        items.push({
+          urgent: offense !== 'first' || accident === 'injury',
+          title: 'Contact a California DUI attorney as soon as possible',
+          detail: offense === 'first' && accident === 'none'
+            ? 'Even for a first offense, an attorney can potentially reduce the charge to a wet reckless, challenge the stop, or contest the BAC results.'
+            : offense === 'second' || offense === 'multiple'
+            ? 'With a prior DUI, mandatory minimum jail time and a 2-year license revocation are on the table. You need experienced representation.'
+            : 'An injury or accident makes this significantly more serious — possibly a felony charge. Get an attorney immediately.'
+        });
+
+        if (test === 'refused') {
+          items.push({
+            urgent: true,
+            title: 'Note: you face enhanced penalties for the refusal',
+            detail: 'A refusal triggers a 1-year automatic license suspension (vs. 4 months) and can be used against you in court. Tell your attorney immediately — they need to know.'
+          });
+        }
+
+        if (test === 'blood') {
+          items.push({
+            urgent: false,
+            title: 'Ask your attorney about requesting an independent blood test analysis',
+            detail: 'California law allows you to request that part of your blood sample be independently tested. This can sometimes reveal problems with the prosecution\'s test results.'
+          });
+        }
+
+        items.push({
+          urgent: false,
+          title: 'Write down everything you remember about the stop and arrest',
+          detail: 'While it\'s fresh: where you were going, what you drank, how long ago, what the officer said and did, whether you were read your rights, any issues with the stop. This helps your attorney.'
+        });
+
+        items.push({
+          urgent: false,
+          title: 'Do NOT post about this on social media',
+          detail: 'Anything you say publicly can be used against you. Say nothing about the incident online until your case is fully resolved.'
+        });
+
+        items.push({
+          urgent: false,
+          title: 'Locate and read the paperwork from your arrest',
+          detail: 'You should have a pink temporary license, a citation, and possibly a DS-367 form. These have important details including your arrest date (critical for the 10-day deadline).'
+        });
+
+        if (accident === 'property' || accident === 'injury') {
+          items.push({
+            urgent: true,
+            title: 'Do not contact the other party or their insurance without your attorney',
+            detail: 'Anything you say can be used in both the criminal case and any civil suit. Let your attorney handle communication.'
+          });
+        }
+
+        items.push({
+          urgent: false,
+          title: 'Arrange alternative transportation now',
+          detail: 'Plan for the possibility of license suspension. Talk to family, set up ride-share accounts, or look at public transit options for work.'
+        });
+
+        html += '<ul class="checklist" id="checklist">';
+        items.forEach((item, i) => {
+          html += `<li id="item-${i}" onclick="toggleCheck(${i})">
+            <div class="check-box">✓</div>
+            <div class="check-text">
+              <strong>${item.urgent ? '⚡ ' : ''}${item.title}</strong><br>
+              <span style="color:rgb(var(--gray)); font-size:0.9em;">${item.detail}</span>
+            </div>
+          </li>`;
+        });
+        html += '</ul>';
+
+        document.getElementById('result-headline').textContent = headline;
+        document.getElementById('result-content').innerHTML = html;
+      }
+
+      function toggleCheck(i) {
+        const item = document.getElementById('item-' + i);
+        item.classList.toggle('checked');
+      }
+    </script>
+  </body>
+</html>

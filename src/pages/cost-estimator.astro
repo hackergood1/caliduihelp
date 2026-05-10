@@ -1,0 +1,433 @@
+---
+export const prerender = true;
+import BaseHead from '../components/BaseHead.astro';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import CookieBanner from '../components/CookieBanner.astro';
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <BaseHead
+      title="California DUI Cost Estimator — What Will a DUI Really Cost You?"
+      description="Estimate the total cost of a California DUI including fines, attorney fees, DUI school, insurance increases, and more. First and second offense."
+    />
+    <style>
+      main {
+        width: 720px;
+        max-width: calc(100% - 2em);
+        margin: auto;
+        padding: 3em 1em;
+      }
+      .disclaimer {
+        background: #fff8e1;
+        border-left: 4px solid #f59e0b;
+        padding: 0.75em 1em;
+        border-radius: 4px;
+        font-size: 0.9em;
+        color: #7c6400;
+        margin-bottom: 2em;
+      }
+      h1 { font-size: 1.6em; margin-bottom: 0.3em; }
+      h2 { font-size: 1.1em; margin-top: 2em; margin-bottom: 0.6em; }
+      .subtitle { color: rgb(var(--gray)); font-size: 0.95em; margin-bottom: 2em; }
+
+      .estimator-card {
+        background: #f8fafc;
+        border: 1px solid rgb(var(--gray-light));
+        border-radius: 12px;
+        padding: 2em;
+        margin-bottom: 2em;
+      }
+      .form-group { margin-bottom: 1.4em; }
+      label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 0.5em;
+        font-size: 0.95em;
+      }
+      .label-hint { font-weight: 400; color: rgb(var(--gray)); font-size: 0.85em; }
+      select, input[type="range"] {
+        width: 100%;
+        padding: 0.65em 0.9em;
+        border: 1.5px solid rgb(var(--gray-light));
+        border-radius: 6px;
+        font-size: 1em;
+        background: white;
+        box-sizing: border-box;
+      }
+      input[type="range"] {
+        padding: 0.3em 0;
+        border: none;
+        background: transparent;
+        cursor: pointer;
+      }
+      .range-row {
+        display: flex;
+        align-items: center;
+        gap: 1em;
+        margin-top: 0.3em;
+      }
+      .range-val {
+        font-weight: 700;
+        font-size: 1.1em;
+        min-width: 60px;
+        text-align: right;
+      }
+      .option-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 0.6em;
+        margin-top: 0.4em;
+      }
+      .option-card {
+        border: 1.5px solid rgb(var(--gray-light));
+        border-radius: 8px;
+        padding: 0.8em;
+        cursor: pointer;
+        text-align: center;
+        background: white;
+        font-size: 0.9em;
+        transition: all 0.15s;
+        user-select: none;
+      }
+      .option-card:hover { border-color: #2337ff; background: #f0f4ff; }
+      .option-card.selected { border-color: #2337ff; background: #e0e7ff; font-weight: 600; }
+      .option-card .icon { font-size: 1.4em; display: block; margin-bottom: 0.2em; }
+
+      .calc-btn {
+        width: 100%;
+        background: #2337ff;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 0.9em;
+        font-size: 1em;
+        font-weight: 700;
+        cursor: pointer;
+        transition: background 0.2s;
+        margin-top: 0.5em;
+      }
+      .calc-btn:hover { background: #1a28d9; }
+
+      #result { display: none; margin-top: 1.5em; }
+
+      .cost-total {
+        text-align: center;
+        background: #fff0f0;
+        border: 2px solid #dc2626;
+        border-radius: 12px;
+        padding: 1.5em;
+        margin-bottom: 1.5em;
+      }
+      .total-label { font-size: 0.9em; color: #7f1d1d; margin-bottom: 0.3em; }
+      .total-range {
+        font-size: 2.4em;
+        font-weight: 900;
+        color: #dc2626;
+        line-height: 1.1;
+      }
+      .total-note { font-size: 0.8em; color: #7f1d1d; margin-top: 0.4em; }
+
+      .cost-breakdown {
+        background: white;
+        border: 1px solid rgb(var(--gray-light));
+        border-radius: 10px;
+        overflow: hidden;
+        margin-bottom: 1em;
+      }
+      .cost-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.9em 1.2em;
+        border-bottom: 1px solid rgb(var(--gray-light));
+        font-size: 0.9em;
+      }
+      .cost-row:last-child { border-bottom: none; }
+      .cost-row-label { flex: 1; }
+      .cost-row-label small { display: block; color: rgb(var(--gray)); font-size: 0.85em; margin-top: 0.1em; }
+      .cost-row-amount {
+        font-weight: 700;
+        color: #dc2626;
+        white-space: nowrap;
+        margin-left: 1em;
+      }
+      .cost-row.header {
+        background: #f8fafc;
+        font-weight: 700;
+        font-size: 0.85em;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: rgb(var(--gray));
+        padding: 0.6em 1.2em;
+        border-bottom: 1px solid rgb(var(--gray-light));
+      }
+
+      .callout {
+        background: #f0f4ff;
+        border-left: 4px solid #2337ff;
+        padding: 0.8em 1em;
+        border-radius: 4px;
+        font-size: 0.88em;
+        line-height: 1.6;
+        margin-top: 1em;
+      }
+    </style>
+  </head>
+  <body>
+    <Header />
+    <main>
+      <div class="disclaimer">
+        <strong>Estimates only.</strong> Costs vary by county, judge, attorney, and individual circumstances. This tool gives you a realistic ballpark — not a quote.
+      </div>
+
+      <h1>California DUI Cost Estimator</h1>
+      <p class="subtitle">Answer a few questions to see a realistic breakdown of what a DUI could cost you in Year 1 — and beyond.</p>
+
+      <div class="estimator-card">
+
+        <div class="form-group">
+          <label>Which offense is this?</label>
+          <div class="option-cards">
+            <div class="option-card selected" data-field="offense" data-value="first">
+              <span class="icon">1️⃣</span>
+              First DUI
+            </div>
+            <div class="option-card" data-field="offense" data-value="second">
+              <span class="icon">2️⃣</span>
+              Second DUI
+            </div>
+            <div class="option-card" data-field="offense" data-value="felony">
+              <span class="icon">⚠️</span>
+              Felony DUI
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>BAC level <span class="label-hint">(higher = worse penalties)</span></label>
+          <div class="option-cards">
+            <div class="option-card selected" data-field="bac" data-value="low">
+              0.08–0.14%
+            </div>
+            <div class="option-card" data-field="bac" data-value="high">
+              0.15%+
+            </div>
+            <div class="option-card" data-field="bac" data-value="refusal">
+              Refused test
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Were you hiring an attorney?</label>
+          <div class="option-cards">
+            <div class="option-card selected" data-field="attorney" data-value="private">
+              <span class="icon">👨‍⚖️</span>
+              Private attorney
+            </div>
+            <div class="option-card" data-field="attorney" data-value="public">
+              <span class="icon">🏛️</span>
+              Public defender
+            </div>
+            <div class="option-card" data-field="attorney" data-value="self">
+              <span class="icon">🙋</span>
+              Self-represent
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Did it involve an accident or injury?</label>
+          <div class="option-cards">
+            <div class="option-card selected" data-field="accident" data-value="no">
+              No accident
+            </div>
+            <div class="option-card" data-field="accident" data-value="property">
+              Property damage
+            </div>
+            <div class="option-card" data-field="accident" data-value="injury">
+              Injury involved
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Your current auto insurance (annual)</label>
+          <div class="range-row">
+            <input type="range" id="insurance-range" min="600" max="3000" step="100" value="1200" />
+            <span class="range-val" id="insurance-val">$1,200</span>
+          </div>
+        </div>
+
+        <button class="calc-btn" id="calc-btn">Estimate My Total Cost</button>
+
+        <div id="result">
+          <div class="cost-total">
+            <div class="total-label">Estimated total cost — Year 1</div>
+            <div class="total-range" id="total-range">$0 – $0</div>
+            <div class="total-note">This is a rough estimate. Your actual costs will vary.</div>
+          </div>
+
+          <div class="cost-breakdown" id="breakdown-table"></div>
+
+          <div class="callout" id="result-notes"></div>
+        </div>
+      </div>
+
+      <h2>Why DUI Costs Are So Unpredictable</h2>
+      <p style="font-size:0.95em; color:rgb(var(--gray-dark)); line-height:1.7; margin-bottom:1em;">
+        California has a "base fine" listed in the Vehicle Code — typically $390 to $1,000. But that's just the starting point. Courts pile on penalty assessments, surcharges, and fees that can multiply the base fine by 3–4x. Then add attorney fees, mandatory programs, insurance spikes, and device costs.
+      </p>
+      <p style="font-size:0.95em; color:rgb(var(--gray-dark)); line-height:1.7;">
+        The most unpredictable piece is insurance. A driver paying $1,200/year who needs an SR-22 after a DUI might see that jump to $3,500–$5,000/year — for 5–10 years. That single factor can dwarf everything else combined.
+      </p>
+    </main>
+    <CookieBanner />
+    <Footer />
+
+    <script>
+      const state = {
+        offense: 'first',
+        bac: 'low',
+        attorney: 'private',
+        accident: 'no',
+        insurance: 1200
+      };
+
+      document.querySelectorAll('.option-card[data-field]').forEach(card => {
+        card.addEventListener('click', () => {
+          const field = card.dataset.field;
+          document.querySelectorAll(`.option-card[data-field="${field}"]`).forEach(c => c.classList.remove('selected'));
+          card.classList.add('selected');
+          state[field] = card.dataset.value;
+        });
+      });
+
+      const insuranceRange = document.getElementById('insurance-range');
+      const insuranceVal = document.getElementById('insurance-val');
+      insuranceRange.addEventListener('input', () => {
+        state.insurance = parseInt(insuranceRange.value);
+        insuranceVal.textContent = '$' + state.insurance.toLocaleString();
+      });
+
+      document.getElementById('calc-btn').addEventListener('click', () => {
+        let finesLow, finesHigh, schoolCost, attorneyLow, attorneyHigh, iidCost, towCost, insuranceMult, licenseRestoration, notes;
+
+        // Court fines
+        if (state.offense === 'first') {
+          finesLow = 1800; finesHigh = 3200;
+        } else if (state.offense === 'second') {
+          finesLow = 2200; finesHigh = 4000;
+        } else {
+          finesLow = 4000; finesHigh = 8000;
+        }
+
+        // BAC modifier
+        if (state.bac === 'high') { finesLow += 300; finesHigh += 600; }
+        if (state.bac === 'refusal') { finesLow += 500; finesHigh += 1000; }
+
+        // DUI school
+        if (state.offense === 'first') {
+          schoolCost = state.bac === 'high' ? [1200, 1800] : [500, 700];
+        } else if (state.offense === 'second') {
+          schoolCost = [1500, 2000];
+        } else {
+          schoolCost = [2000, 3000];
+        }
+
+        // Attorney
+        if (state.attorney === 'private') {
+          if (state.offense === 'first') { attorneyLow = 1500; attorneyHigh = 3500; }
+          else if (state.offense === 'second') { attorneyLow = 2500; attorneyHigh = 5000; }
+          else { attorneyLow = 5000; attorneyHigh = 12000; }
+        } else if (state.attorney === 'public') {
+          attorneyLow = 0; attorneyHigh = 400;
+        } else {
+          attorneyLow = 0; attorneyHigh = 200;
+        }
+
+        // Accident modifier on attorney
+        if (state.accident === 'property') { attorneyLow += 500; attorneyHigh += 1500; }
+        if (state.accident === 'injury') { attorneyLow += 3000; attorneyHigh += 8000; }
+
+        // IID
+        if (state.offense === 'first') {
+          iidCost = [500, 1000];
+        } else {
+          iidCost = [900, 1800];
+        }
+
+        // Tow
+        towCost = [250, 500];
+
+        // Insurance
+        if (state.offense === 'first') insuranceMult = 1.8;
+        else if (state.offense === 'second') insuranceMult = 2.5;
+        else insuranceMult = 3.5;
+        const insuranceIncrease = Math.round(state.insurance * insuranceMult - state.insurance);
+
+        // License restoration
+        licenseRestoration = 125;
+
+        const totalLow = Math.round(
+          finesLow + schoolCost[0] + attorneyLow + iidCost[0] + towCost[0] + insuranceIncrease + licenseRestoration
+        );
+        const totalHigh = Math.round(
+          finesHigh + schoolCost[1] + attorneyHigh + iidCost[1] + towCost[1] + insuranceIncrease + licenseRestoration
+        );
+
+        document.getElementById('total-range').textContent =
+          '$' + totalLow.toLocaleString() + ' – $' + totalHigh.toLocaleString();
+
+        const fmt = (lo, hi) => '$' + lo.toLocaleString() + ' – $' + hi.toLocaleString();
+
+        document.getElementById('breakdown-table').innerHTML = `
+          <div class="cost-row header"><span>Cost item</span><span>Estimate</span></div>
+          <div class="cost-row">
+            <div class="cost-row-label">Court fines &amp; assessments<small>Base fine + California penalty multipliers</small></div>
+            <div class="cost-row-amount">${fmt(finesLow, finesHigh)}</div>
+          </div>
+          <div class="cost-row">
+            <div class="cost-row-label">DUI school / alcohol program<small>${state.offense === 'second' ? '18-month program' : state.bac === 'high' ? '9-month program (high BAC)' : '3-month program'}</small></div>
+            <div class="cost-row-amount">${fmt(schoolCost[0], schoolCost[1])}</div>
+          </div>
+          <div class="cost-row">
+            <div class="cost-row-label">Attorney fees<small>${state.attorney === 'private' ? 'Private DUI attorney' : state.attorney === 'public' ? 'Public defender (nominal admin fees)' : 'Self-representation costs'}</small></div>
+            <div class="cost-row-amount">${fmt(attorneyLow, attorneyHigh)}</div>
+          </div>
+          <div class="cost-row">
+            <div class="cost-row-label">Ignition Interlock Device (IID)<small>Installation + monthly monitoring × months</small></div>
+            <div class="cost-row-amount">${fmt(iidCost[0], iidCost[1])}</div>
+          </div>
+          <div class="cost-row">
+            <div class="cost-row-label">Insurance increase (Year 1 only)<small>SR-22 requirement + rate spike on $${state.insurance.toLocaleString()}/yr policy</small></div>
+            <div class="cost-row-amount">+$${insuranceIncrease.toLocaleString()}</div>
+          </div>
+          <div class="cost-row">
+            <div class="cost-row-label">Towing &amp; impound<small>Car towed at arrest, storage until release</small></div>
+            <div class="cost-row-amount">${fmt(towCost[0], towCost[1])}</div>
+          </div>
+          <div class="cost-row">
+            <div class="cost-row-label">License reinstatement fee<small>DMV fee to restore driving privilege after suspension</small></div>
+            <div class="cost-row-amount">$${licenseRestoration}</div>
+          </div>
+        `;
+
+        let notesText = '⚠️ <strong>Not included in this estimate:</strong> lost wages from court dates and DUI school, any civil lawsuits from accidents, bail bonds if applicable, or the insurance increase in years 2–5+.';
+        if (state.accident === 'injury') {
+          notesText += ' A DUI with injury significantly raises the stakes — civil liability and potential felony charges can add tens of thousands more.';
+        }
+        if (state.offense === 'second') {
+          notesText += ' With a second offense, the insurance hit often continues for 7–10 years, easily adding $10,000–$20,000 beyond Year 1.';
+        }
+        document.getElementById('result-notes').innerHTML = notesText;
+
+        document.getElementById('result').style.display = 'block';
+        document.getElementById('result').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      });
+    </script>
+  </body>
+</html>
