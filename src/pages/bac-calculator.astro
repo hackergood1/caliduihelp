@@ -10,9 +10,39 @@ import CookieBanner from '../components/CookieBanner.astro';
 <html lang="en">
   <head>
     <BaseHead
-      title="BAC Calculator — Estimate Your Blood Alcohol Content | CaliDUIHelp"
-      description="Use this BAC estimator to understand how drinks, weight, and time affect your blood alcohol level. For educational purposes only — not a substitute for a breathalyzer."
+      title="How Much Is Too Much to Drink Before Driving? BAC Calculator | CaliDUIHelp"
+      description="How many drinks is too many before driving? Use our BAC calculator to find out — and learn why 'feeling fine' is not the same as being under the legal limit in California."
     />
+    <script type="application/ld+json" set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "How much is too much to drink before driving?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "In California, the legal limit is 0.08% BAC for drivers 21 and over. For most people, that's roughly 1-2 standard drinks per hour — but weight, sex, food, and metabolism all affect it significantly. One drink can be too many if you're under 21, on DUI probation, or driving a commercial vehicle."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can I feel sober and still be over the legal limit?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. Tolerance means your brain adjusts to alcohol's effects, but your actual BAC stays the same. You can feel completely normal and still be at 0.10% or higher. The breathalyzer doesn't care how you feel."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How long does it take to sober up after drinking?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Your body metabolizes alcohol at a fixed rate of roughly 0.015% BAC per hour. Coffee, food, and water don't speed this up — only time does. If you're at 0.10%, it takes about 7 hours to reach 0.00%."
+          }
+        }
+      ]
+    })} />
     <style>
       main {
         width: 720px;
@@ -210,8 +240,26 @@ import CookieBanner from '../components/CookieBanner.astro';
         <strong>Educational only — not a breathalyzer.</strong> This calculator uses a standard formula that gives a rough estimate. Actual BAC depends on metabolism, medications, food, hydration, and more. Never rely on this to decide whether to drive.
       </div>
 
-      <h1>BAC Estimator</h1>
-      <p class="subtitle">Get a rough idea of where your blood alcohol might be based on what you drank, your weight, and how long ago you started drinking.</p>
+      <h1>How Much Is Too Much to Drink Before Driving?</h1>
+      <p class="subtitle">The honest answer: less than most people think — and it depends on you specifically.</p>
+
+      <p>The question sounds simple. The answer isn't.</p>
+      <p>In California, the legal limit is <strong>0.08% blood alcohol content (BAC)</strong> for drivers 21 and over. But "the legal limit" is not the same as "the safe amount." And for a lot of people, 0.08% arrives sooner than they expect.</p>
+
+      <p>Here's the rough rule of thumb: for an average adult, <strong>one standard drink raises BAC by about 0.02–0.03%</strong>, and your body burns off alcohol at roughly <strong>one drink per hour</strong>. That means:</p>
+
+      <ul style="margin: 0.8em 0 1em 1.4em; line-height: 1.9;">
+        <li>Two drinks in an hour: you're likely around 0.04–0.06% — below the limit, but not zero</li>
+        <li>Three drinks in two hours: you could be right at or over 0.08%</li>
+        <li>Four drinks in two hours: most people are clearly over the limit</li>
+      </ul>
+
+      <p>But those numbers shift significantly based on your weight, sex, whether you ate, and your metabolism. A 120-pound woman hits 0.08% much faster than a 220-pound man drinking the same drinks. The calculator below runs the actual math for your numbers.</p>
+
+      <h2 style="font-size:1.1em; margin: 1.8em 0 0.5em;">Why "I Feel Fine" Doesn't Mean You're Legal</h2>
+      <p>This is the thing that catches people. <strong>Tolerance changes how you feel — not your actual BAC.</strong> If you drink regularly, your brain gets used to the effects. You feel normal at a BAC where someone else would be stumbling. But the breathalyzer reads the same number either way.</p>
+      <p>A lot of DUI arrests happen to people who genuinely felt sober. They drove carefully. They weren't weaving. They got stopped for something unrelated — a taillight, a rolling stop — and blew over the limit.</p>
+      <p style="margin-bottom: 2em;">Use the calculator below to get a realistic estimate based on your situation.</p>
 
       <div class="calc-card">
         <div class="form-group">
@@ -308,6 +356,81 @@ import CookieBanner from '../components/CookieBanner.astro';
             <strong>Any amount — DUI probation</strong>
             If you're on DUI probation, you cannot drive with any alcohol in your system at all.
           </div>
+        </div>
+      </div>
+
+      <div class="info-section">
+        <h2>How Many Drinks Is Too Many? A Simple Guide by Body Weight</h2>
+        <p style="font-size:0.9em; color:rgb(var(--gray)); margin-bottom:1em; line-height:1.6;">These are rough estimates for standard drinks consumed over <strong>one hour</strong> on an empty stomach. Add food, spread drinks over more time, or weigh more — and these numbers shift in your favor. Subtract those factors and they shift against you.</p>
+        <div style="overflow-x:auto; margin-bottom:1em;">
+          <table style="width:100%; border-collapse:collapse; font-size:0.88em;">
+            <thead>
+              <tr style="background:#f8fafc;">
+                <th style="padding:0.7em 0.8em; border:1px solid rgb(var(--gray-light)); text-align:left;">Weight</th>
+                <th style="padding:0.7em 0.8em; border:1px solid rgb(var(--gray-light)); text-align:center;">1 drink</th>
+                <th style="padding:0.7em 0.8em; border:1px solid rgb(var(--gray-light)); text-align:center;">2 drinks</th>
+                <th style="padding:0.7em 0.8em; border:1px solid rgb(var(--gray-light)); text-align:center;">3 drinks</th>
+                <th style="padding:0.7em 0.8em; border:1px solid rgb(var(--gray-light)); text-align:center;">4 drinks</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="padding:0.6em 0.8em; border:1px solid rgb(var(--gray-light));">120 lbs (F)</td>
+                <td style="padding:0.6em 0.8em; border:1px solid rgb(var(--gray-light)); text-align:center;">~0.04%</td>
+                <td style="padding:0.6em 0.8em; border:1px solid rgb(var(--gray-light)); text-align:center; color:#ca8a04; font-weight:600;">~0.08%</td>
+                <td style="padding:0.6em 0.8em; border:1px solid rgb(var(--gray-light)); text-align:center; color:#dc2626; font-weight:600;">~0.11%</td>
+                <td style="padding:0.6em 0.8em; border:1px solid rgb(var(--gray-light)); text-align:center; color:#dc2626; font-weight:600;">~0.15%</td>
+              </tr>
+              <tr style="background:#fafafa;">
+                <td style="padding:0.6em 0.8em; border:1px solid rgb(var(--gray-light));">150 lbs (M)</td>
+                <td style="padding:0.6em 0.8em; border:1px solid rgb(var(--gray-light)); text-align:center;">~0.03%</td>
+                <td style="padding:0.6em 0.8em; border:1px solid rgb(var(--gray-light)); text-align:center;">~0.05%</td>
+                <td style="padding:0.6em 0.8em; border:1px solid rgb(var(--gray-light)); text-align:center; color:#ca8a04; font-weight:600;">~0.08%</td>
+                <td style="padding:0.6em 0.8em; border:1px solid rgb(var(--gray-light)); text-align:center; color:#dc2626; font-weight:600;">~0.11%</td>
+              </tr>
+              <tr>
+                <td style="padding:0.6em 0.8em; border:1px solid rgb(var(--gray-light));">180 lbs (M)</td>
+                <td style="padding:0.6em 0.8em; border:1px solid rgb(var(--gray-light)); text-align:center;">~0.02%</td>
+                <td style="padding:0.6em 0.8em; border:1px solid rgb(var(--gray-light)); text-align:center;">~0.04%</td>
+                <td style="padding:0.6em 0.8em; border:1px solid rgb(var(--gray-light)); text-align:center;">~0.06%</td>
+                <td style="padding:0.6em 0.8em; border:1px solid rgb(var(--gray-light)); text-align:center; color:#ca8a04; font-weight:600;">~0.09%</td>
+              </tr>
+              <tr style="background:#fafafa;">
+                <td style="padding:0.6em 0.8em; border:1px solid rgb(var(--gray-light));">220 lbs (M)</td>
+                <td style="padding:0.6em 0.8em; border:1px solid rgb(var(--gray-light)); text-align:center;">~0.02%</td>
+                <td style="padding:0.6em 0.8em; border:1px solid rgb(var(--gray-light)); text-align:center;">~0.03%</td>
+                <td style="padding:0.6em 0.8em; border:1px solid rgb(var(--gray-light)); text-align:center;">~0.05%</td>
+                <td style="padding:0.6em 0.8em; border:1px solid rgb(var(--gray-light)); text-align:center;">~0.07%</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p style="font-size:0.82em; color:rgb(var(--gray));">🟡 Yellow = at or near the 0.08% legal limit &nbsp;|&nbsp; 🔴 Red = over the limit &nbsp;|&nbsp; Based on standard drinks (12oz beer / 5oz wine / 1.5oz shot), empty stomach, one-hour window.</p>
+      </div>
+
+      <div class="info-section">
+        <h2>Frequently Asked Questions</h2>
+        <div style="display:flex; flex-direction:column; gap:0.8em; margin-top:1em;">
+          <details style="background:white; border:1px solid rgb(var(--gray-light)); border-radius:8px; padding:1em 1.2em;">
+            <summary style="font-weight:700; cursor:pointer; font-size:0.95em;">Does eating before drinking really make a difference?</summary>
+            <p style="margin:0.8em 0 0; font-size:0.9em; color:rgb(var(--gray-dark)); line-height:1.7;">Yes — significantly. Food slows the absorption of alcohol into your bloodstream. On a full stomach, peak BAC can be 30–50% lower than on an empty stomach for the same amount of alcohol. High-fat and high-protein foods slow absorption most. But food doesn't eliminate alcohol — it just delays and softens the curve.</p>
+          </details>
+          <details style="background:white; border:1px solid rgb(var(--gray-light)); border-radius:8px; padding:1em 1.2em;">
+            <summary style="font-weight:700; cursor:pointer; font-size:0.95em;">Does coffee or water help you sober up faster?</summary>
+            <p style="margin:0.8em 0 0; font-size:0.9em; color:rgb(var(--gray-dark)); line-height:1.7;">No. This is one of the most persistent myths about alcohol. Coffee makes you feel more awake, but it does nothing to lower your BAC. Water helps with hydration and prevents hangovers, but it doesn't speed up how fast your liver processes alcohol. Only time does that — at roughly 0.015% per hour.</p>
+          </details>
+          <details style="background:white; border:1px solid rgb(var(--gray-light)); border-radius:8px; padding:1em 1.2em;">
+            <summary style="font-weight:700; cursor:pointer; font-size:0.95em;">Can you get a DUI if you're under the 0.08% limit?</summary>
+            <p style="margin:0.8em 0 0; font-size:0.9em; color:rgb(var(--gray-dark)); line-height:1.7;">Yes. California has two separate DUI laws. One (VC 23152b) makes it illegal to drive with a BAC of 0.08% or higher. The other (VC 23152a) makes it illegal to drive while impaired by alcohol — at any BAC level. If an officer observes impaired driving and your BAC is 0.06%, you can still be charged. The 0.08% limit makes it easier to prosecute, not impossible to charge below it.</p>
+          </details>
+          <details style="background:white; border:1px solid rgb(var(--gray-light)); border-radius:8px; padding:1em 1.2em;">
+            <summary style="font-weight:700; cursor:pointer; font-size:0.95em;">How long after drinking is it safe to drive?</summary>
+            <p style="margin:0.8em 0 0; font-size:0.9em; color:rgb(var(--gray-dark)); line-height:1.7;">A rough formula: divide your estimated peak BAC by 0.015 to get the number of hours until you reach 0.00%. So if your peak BAC was 0.09%, that's about 6 hours. But this varies by person. The safest answer is: if you're not sure, don't drive. Rideshare costs a fraction of what a DUI costs.</p>
+          </details>
+          <details style="background:white; border:1px solid rgb(var(--gray-light)); border-radius:8px; padding:1em 1.2em;">
+            <summary style="font-weight:700; cursor:pointer; font-size:0.95em;">Is one drink always safe before driving?</summary>
+            <p style="margin:0.8em 0 0; font-size:0.9em; color:rgb(var(--gray-dark)); line-height:1.7;">For most adults 21+, one standard drink over an hour puts you well under 0.08%. But "safe" depends on your weight, your metabolism, whether you've eaten, and your baseline. If you're under 21, any detectable alcohol is a violation in California. If you're on DUI probation, zero tolerance applies. And even at low BAC levels, reaction time and judgment are slightly affected — the question isn't just "am I legal?" but "am I as sharp as I should be?"</p>
+          </details>
         </div>
       </div>
 
