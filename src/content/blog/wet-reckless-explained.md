@@ -2,7 +2,7 @@
 title: "Wet Reckless vs DUI: What's the Difference and Should You Take the Deal?"
 description: "A 'wet reckless' is a reduced charge that some people can get instead of a DUI conviction. Here's what it means, what it doesn't protect you from, and when it's worth taking."
 pubDate: '2026-04-30'
-heroImage: '../../assets/blog-placeholder-1.jpg'
+heroImage: '../../assets/wet-reckless-hero.jpg'
 ---
 
 If you've been charged with a DUI in California and hired an attorney, there's a decent chance they've mentioned the phrase **"wet reckless."** It sounds like lawyer-speak, but it's a real thing — and for the right case, it can make a meaningful difference.
